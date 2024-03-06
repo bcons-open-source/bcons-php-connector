@@ -45,6 +45,12 @@ class Bcons
   // "Bcons-User: XXXXX" the key will appear as HTTP_BCONS_USER
   protected $userTokenHttpHeader = 'HTTP_BCONS_USER';
 
+  // By default when creating a new instance request, session and cookies
+  // messages will be sent.
+  protected $autosendRequestData = true;
+  protected $autosendSessionData = true;
+  protected $autosendCookiesData = true;
+
   // Predefined message types
   const TYPE_LOG = 'l';
   const TYPE_WARN = 'w';
@@ -70,13 +76,24 @@ class Bcons
    *                       data sent to the bcons server.
    * - bconsHost: optional. The bcons host to send messages to.
    * - bconsPort: optional. The bcons port to send messages to.
-   *
+   * - autosendRequestData: optional, defaults to true. If false no request
+   *                        payload data messages will be sent when the class
+   *                        is created.
+   * - autosendSessionData: optional, defaults to true. If false no session
+   *                        debug messages will be sent when the class is
+   *                        created.
+   * - autosendCookiesData: optional, defaults to true. If false no cookies
+   *                        debug messages will be sent when the class is
+   *                        created.
    * @param array $options
    */
   function __construct($options)
   {
     // Set options if defined
-    $ops = array('projectToken', 'userToken', 'cryptKey', 'bconsHost', 'bconsPort');
+    $ops = array(
+      'projectToken', 'userToken', 'cryptKey', 'bconsHost', 'bconsPort',
+      'autosendRequestData', 'autosendSessionData', 'autosendCookiesData'
+    );
     foreach ($ops as $option)
       if (isset($options[$option]))
         $this->$option = $options[$option];
@@ -100,9 +117,12 @@ class Bcons
     register_shutdown_function(array($this, "shutdown"));
 
     // Send request data
-    $this->sendRequestPayload();
-    $this->sendSessionData();
-    $this->sendCookiesData();
+    if ($this->autosendRequestData)
+      $this->sendRequestPayload();
+    if ($this->autosendSessionData)
+      $this->sendSessionData();
+    if ($this->autosendCookiesData)
+      $this->sendCookiesData();
   }
 
   /**
