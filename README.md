@@ -25,7 +25,7 @@ You will also need a bcons account (there is a 'free forever' plan for 1 user an
 
 ## Usage
 
-Create the bcons class.
+Instantiate the bcons class.
 
 ```php
 use Karontek\Bcons\Bcons;
