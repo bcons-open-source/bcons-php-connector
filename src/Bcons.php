@@ -66,7 +66,8 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   /**
-   * The options named array may contain the following members:
+   * The constructor may receive a string with the project token or a named
+   * array that may contain the following members:
    * - projectToken: required. The token for this app's project.
    * - userToken: optional. The user token is sent in an http request header
    *                        when the user has the bcons browser extension, so
@@ -85,18 +86,23 @@ class Bcons
    * - autosendCookiesData: optional, defaults to true. If false no cookies
    *                        debug messages will be sent when the class is
    *                        created.
-   * @param array $options
+   * @param mixed $options
    */
   function __construct($options)
   {
-    // Set options if defined
-    $ops = array(
-      'projectToken', 'userToken', 'cryptKey', 'bconsHost', 'bconsPort',
-      'autosendRequestData', 'autosendSessionData', 'autosendCookiesData'
-    );
-    foreach ($ops as $option)
-      if (isset($options[$option]))
-        $this->$option = $options[$option];
+    if (is_string($options))
+      $this->projectToken = $options;
+    else
+    {
+      // Overwrite default options
+      $ops = array(
+        'projectToken', 'userToken', 'cryptKey', 'bconsHost', 'bconsPort',
+        'autosendRequestData', 'autosendSessionData', 'autosendCookiesData'
+      );
+      foreach ($ops as $option)
+        if (isset($options[$option]))
+          $this->$option = $options[$option];
+    }
 
     // If user token not provided look for it in request header
     if (!$this->userToken && isset($_SERVER[$this->userTokenHttpHeader]))
