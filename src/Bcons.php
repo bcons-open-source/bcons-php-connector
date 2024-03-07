@@ -321,7 +321,7 @@ class Bcons
         $this->bconsHost,
         $this->bconsPort
       );
-      if ($x % 10 == 0)
+      if ($x && $x % 10 == 0)
         usleep(100000);
     }
 
