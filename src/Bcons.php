@@ -20,7 +20,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.3';
+  public $version = '1.0.4';
 
   // Default options
   protected $options = array(
