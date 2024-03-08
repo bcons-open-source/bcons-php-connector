@@ -5,52 +5,6 @@ namespace Karontek\Bcons;
 
 class Bcons
 {
-  public $version = 1.0;
-
-  // The token of this project
-  protected $projectToken;
-
-  // The token of the user who requested the URL that sends the debug message.
-  // The browser extension sends this value in the HTTP request header
-  // 'Bcons-User'.
-  protected $userToken = null;
-
-  // The key used to encrypt the debug data. If null, data is sent unencrypted.
-  // You should never send any data through the Internet unencrypted, so we
-  // strongly recommend setting a passphrase here.
-  protected $cryptKey = null;
-
-  // bcons will send messages for the error codes listed in this array.
-  protected $reportErrorCodes = array(E_ALL);
-
-  // Sometimes, two consecutive messages may have the same timestamp. This
-  // counter allows them to be ordered correctly.
-  protected $msgCount = 0;
-
-  // The file name and line that are sent as the origin of the debug function
-  // call are obtained by calling debug_backtrace. This value represents the
-  // number of items we remove from the start of the returned array to get the
-  // correct file name.
-  protected $numSkipBt = 1;
-
-  // The bcons server to which messages are sent
-  protected $bconsHost = 'bcons.dev';
-  protected $bconsPort = 9002;
-
-  // Max size for a message in bytes; any message larger than this will be split
-  protected $maxMsgSize = 1000;
-
-  // The key of the http request header that contains the bcons user token, as
-  // appears in the $_SERVER superglobal. If, for example, the header is
-  // "Bcons-User: XXXXX" the key will appear as HTTP_BCONS_USER
-  protected $userTokenHttpHeader = 'HTTP_BCONS_USER';
-
-  // By default when creating a new instance request, session and cookies
-  // messages will be sent.
-  protected $autosendRequestData = true;
-  protected $autosendSessionData = true;
-  protected $autosendCookiesData = true;
-
   // Predefined message types
   const TYPE_LOG = 'l';
   const TYPE_WARN = 'w';
@@ -65,54 +19,87 @@ class Bcons
   const CONTENT_DATA = 'd';
   const CONTENT_AUTO = 'auto';
 
+  // Package version
+  public $version = '1.0.3';
+
+  // Default options
+  protected $options = array(
+    // The token of this project
+    'projectToken' => null,
+    // The token of the user who requested the URL that sends the debug message.
+    // The browser extension sends this value in the HTTP request header
+    // 'Bcons-User'.
+    'userToken' => null,
+    // The key used to encrypt the debug data. If null, data is sent
+    // unencrypted.
+    // You should never send any data through the Internet unencrypted, so we
+    // strongly recommend setting a passphrase here.
+    'cryptKey' => null,
+    // bcons will send messages for the error codes listed in this array.
+    'reportErrorCodes' => array(E_ALL),
+    // The bcons server to which messages are sent
+    'bconsHost' => 'apps.bcons.dev',
+    'bcosPort' => 61947,
+    // The key of the http request header that contains the bcons user token, as
+    // appears in the $_SERVER superglobal. If, for example, the header is
+    // "Bcons-User: XXXXX" the key will appear as HTTP_BCONS_USER
+    'userTokenHttpHeader' => 'HTTP_BCONS_USER',
+    // By default when creating a new instance request, session and cookies
+    // messages will be sent.
+    'sendRequestDataOnStart' => true,
+    'sendSessionDataOnStart' => true,
+    'sendCookiesDataOnStart' => true
+  );
+
+  // Sometimes, two consecutive messages may have the same timestamp. This
+  // counter allows them to be ordered correctly.
+  protected $msgCount = 0;
+
+  // The file name and line that are sent as the origin of the debug function
+  // call are obtained by calling debug_backtrace. This value represents the
+  // number of items we remove from the start of the returned array to get the
+  // correct file name.
+  protected $numSkipBt = 1;
+
+  // Max size for a message in bytes; any message larger than this will be split
+  protected $maxMsgSize = 1000;
+
+
   /**
    * The constructor may receive a string with the project token or a named
-   * array that may contain the following members:
-   * - projectToken: required. The token for this app's project.
-   * - userToken: optional. The user token is sent in an http request header
-   *                        when the user has the bcons browser extension, so
-   *                        this class will look for it there. If you set this
-   *                        option manually that header value will be ignored.
-   * - cryptKey: optional. If set to any value it will be used to encrypt the
-   *                       data sent to the bcons server.
-   * - bconsHost: optional. The bcons host to send messages to.
-   * - bconsPort: optional. The bcons port to send messages to.
-   * - autosendRequestData: optional, defaults to true. If false no request
-   *                        payload data messages will be sent when the class
-   *                        is created.
-   * - autosendSessionData: optional, defaults to true. If false no session
-   *                        debug messages will be sent when the class is
-   *                        created.
-   * - autosendCookiesData: optional, defaults to true. If false no cookies
-   *                        debug messages will be sent when the class is
-   *                        created.
-   * @param mixed $options
+   * array where the keys set will overwrite its default values set in the
+   * $options member.
+   * @param mixed $customOptions
    */
-  function __construct($options)
+  function __construct($customOptions)
   {
-    if (is_string($options))
-      $this->projectToken = $options;
+    if (is_string($customOptions))
+      $this->options['projectToken'] = $customOptions;
     else
     {
       // Overwrite default options
-      $ops = array(
-        'projectToken', 'userToken', 'cryptKey', 'bconsHost', 'bconsPort',
-        'autosendRequestData', 'autosendSessionData', 'autosendCookiesData'
-      );
-      foreach ($ops as $option)
-        if (isset($options[$option]))
-          $this->$option = $options[$option];
+      foreach ($this->options as $k => $v)
+        if (isset($customOptions[$k]))
+          $this->options[$k] = $customOptions[$k];
     }
 
     // If user token not provided look for it in request header
-    if (!$this->userToken && isset($_SERVER[$this->userTokenHttpHeader]))
-      $this->userToken = $_SERVER[$this->userTokenHttpHeader];
+    if (
+      !$this->options['userToken'] &&
+      isset($_SERVER[$this->options['userTokenHttpHeader']])
+    )
+    {
+      $this->options['userToken'] = $_SERVER[
+        $this->options['userTokenHttpHeader']
+      ];
+    }
+
 
     // If bcons project or user is missing there's nothing else to do here
-    if (!$this->userToken)
+    if (!$this->options['userToken'])
       return;
 
-    if (!$this->projectToken)
+    if (!$this->options['projectToken'])
     {
       trigger_error('bcons project token not found', E_USER_WARNING);
       return;
@@ -123,11 +110,11 @@ class Bcons
     register_shutdown_function(array($this, "shutdown"));
 
     // Send request data
-    if ($this->autosendRequestData)
+    if ($this->options['sendRequestDataOnStart'])
       $this->sendRequestPayload();
-    if ($this->autosendSessionData)
+    if ($this->options['sendSessionDataOnStart'])
       $this->sendSessionData();
-    if ($this->autosendCookiesData)
+    if ($this->options['sendCookiesDataOnStart'])
       $this->sendCookiesData();
   }
 
@@ -238,7 +225,7 @@ class Bcons
     $contentType = self::CONTENT_AUTO)
   {
     // If no bcons user or project is set we can't send the message
-    if (!$this->userToken || !$this->projectToken)
+    if (!$this->options['userToken'] || !$this->options['projectToken'])
       return;
 
     // Set content type and format data accordingly
@@ -281,8 +268,8 @@ class Bcons
 
     // Create message object
     $message = array(
-      't' => $this->projectToken,
-      'u' => $this->userToken,
+      't' => $this->options['projectToken'],
+      'u' => $this->options['userToken'],
       'ts' => $ts,
       'o' => $order,
       'm' => $data,
@@ -295,7 +282,7 @@ class Bcons
     );
 
     // Encrypt data if required
-    if ($this->cryptKey)
+    if ($this->options['cryptKey'])
     {
       $message['m'] = $this->cryptAES256($message['m']);
       $message['e'] = 1;
@@ -318,8 +305,8 @@ class Bcons
         $packet,
         strlen($packet),
         0,
-        $this->bconsHost,
-        $this->bconsPort
+        $this->options['bconsHost'],
+        $this->options['bconsPort']
       );
       if ($x && $x % 10 == 0)
         usleep(100000);
@@ -378,7 +365,7 @@ class Bcons
     $iv = openssl_random_pseudo_bytes($ivLength);
 
     // Derive the encryption key from the crypt key
-    $key = hash('sha256', $this->cryptKey, true);
+    $key = hash('sha256', $this->options['cryptKey'], true);
 
     // Encrypt the plaintext
     $encrypted = openssl_encrypt(
@@ -408,8 +395,8 @@ class Bcons
   {
     // Should we send a message?
     if (
-      in_array(E_ALL, $this->reportErrorCodes) ||
-      in_array($errorNumber, $this->reportErrorCodes)
+      in_array(E_ALL, $this->options['reportErrorCodes']) ||
+      in_array($errorNumber, $this->options['reportErrorCodes'])
     )
     {
       // Set the message type
