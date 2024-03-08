@@ -39,7 +39,7 @@ class Bcons
     'reportErrorCodes' => array(E_ALL),
     // The bcons server to which messages are sent
     'bconsHost' => 'apps.bcons.dev',
-    'bcosPort' => 61947,
+    'bconsPort' => 61947,
     // The key of the http request header that contains the bcons user token, as
     // appears in the $_SERVER superglobal. If, for example, the header is
     // "Bcons-User: XXXXX" the key will appear as HTTP_BCONS_USER
