@@ -20,7 +20,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.4';
+  public $version = '1.0.5';
 
   // Default options
   protected $options = array(
@@ -51,9 +51,11 @@ class Bcons
     'sendCookiesDataOnStart' => true
   );
 
-  // Sometimes, two consecutive messages may have the same timestamp. This
-  // counter allows them to be ordered correctly.
-  protected $msgCount = 0;
+  // Sometimes, two consecutive messages may have the same timestamp.  In this
+  // array, we'll track how many messages have been sent for each type and add
+  // that count to the timestamp to ensure they are displayed in the correct
+  // order.
+  protected $msgCount = array();
 
   // The file name and line that are sent as the origin of the debug function
   // call are obtained by calling debug_backtrace. This value represents the
@@ -246,7 +248,10 @@ class Bcons
     // For the order we'll use the timestamp but we'll add the number of
     // messages sent, since two consecutive calls may have the same timestamp
     $ts = time();
-    $order = $ts . str_pad($this->msgCount++, 15, '0', STR_PAD_LEFT);
+    if (!isset($this->msgCount[$messageType]))
+      $this->msgCount[$messageType] = 0;
+    $count = ++$this->msgCount[$messageType];
+    $order = $ts . str_pad($count, 3, '0', STR_PAD_LEFT);
 
     // Get the backtack info for this call
     $trace = array_slice(
