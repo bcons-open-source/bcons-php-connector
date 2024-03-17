@@ -20,7 +20,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.5';
+  public $version = '1.0.6';
 
   // Default options
   protected $options = array(
@@ -125,7 +125,7 @@ class Bcons
    * param is received an array with all params will be shown.
    *
    * @param mixed $data
-   * @return void
+   * @return Bcons
    */
   public function log($data)
   {
@@ -134,13 +134,15 @@ class Bcons
     if (count($args) == 1)
       $this->buildMessage(self::TYPE_LOG, $args[0], self::CONTENT_AUTO);
     else $this->buildMessage(self::TYPE_LOG, $args, self::CONTENT_AUTO);
+
+    return $this;
   }
 
   /**
    * Same as log, but for the warnings panel
    *
    * @param mixed $data
-   * @return void
+   * @return Bcons
    */
   public function warn($data)
   {
@@ -149,13 +151,15 @@ class Bcons
     if (count($args) == 1)
       $this->buildMessage(self::TYPE_WARN, $args[0], self::CONTENT_AUTO);
     else $this->buildMessage(self::TYPE_WARN, $args, self::CONTENT_AUTO);
+
+    return $this;
   }
 
   /**
    * Same as log, but for the errors panel
    *
    * @param mixed $data
-   * @return void
+   * @return Bcons
    */
   public function error($data)
   {
@@ -164,13 +168,15 @@ class Bcons
     if (count($args) == 1)
       $this->buildMessage(self::TYPE_ERROR, $args[0], self::CONTENT_AUTO);
     else $this->buildMessage(self::TYPE_ERROR, $args, self::CONTENT_AUTO);
+
+    return $this;
   }
 
   /**
    * Same as log, but for the request panel
    *
    * @param mixed $data
-   * @return void
+   * @return Bcons
    */
   public function request($data)
   {
@@ -179,13 +185,15 @@ class Bcons
     if (count($args) == 1)
       $this->buildMessage(self::TYPE_REQUEST, $args[0], self::CONTENT_AUTO);
     else $this->buildMessage(self::TYPE_REQUEST, $args, self::CONTENT_AUTO);
+
+    return $this;
   }
 
   /**
    * Same as log, but for the session panel
    *
    * @param mixed $data
-   * @return void
+   * @return Bcons
    */
   public function session($data)
   {
@@ -194,13 +202,15 @@ class Bcons
     if (count($args) == 1)
       $this->buildMessage(self::TYPE_SESSION, $args[0], self::CONTENT_AUTO);
     else $this->buildMessage(self::TYPE_SESSION, $args, self::CONTENT_AUTO);
+
+    return $this;
   }
 
   /**
    * Same as log, but for the cookies panel
    *
    * @param mixed $data
-   * @return void
+   * @return Bcons
    */
   public function cookies($data)
   {
@@ -209,6 +219,8 @@ class Bcons
     if (count($args) == 1)
       $this->buildMessage(self::TYPE_COOKIE, $args[0], self::CONTENT_AUTO);
     else $this->buildMessage(self::TYPE_COOKIE, $args, self::CONTENT_AUTO);
+
+    return $this;
   }
 
   /**
@@ -219,12 +231,16 @@ class Bcons
    *                         where the message will appear).
    * @param mixed $data The message data.
    * @param int $contentType The data type of the message.
+   * @param array $trace When capturing messages with the error handler the
+   *                     backtrace is not available via debug_backtrace and
+   *                     is provided by the error handler.
    * @return void
    */
   public function buildMessage(
     $messageType,
     $data,
-    $contentType = self::CONTENT_AUTO)
+    $contentType = self::CONTENT_AUTO,
+    $trace = null)
   {
     // If no bcons user or project is set we can't send the message
     if (!$this->options['userToken'] || !$this->options['projectToken'])
@@ -253,11 +269,14 @@ class Bcons
     $count = ++$this->msgCount[$messageType];
     $order = $ts . str_pad($count, 3, '0', STR_PAD_LEFT);
 
-    // Get the backtack info for this call
-    $trace = array_slice(
-      debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),
-      $this->numSkipBt
-    );
+    // Get the backtack info for this call (if not already provided)
+    if (!$trace)
+    {
+      $trace = array_slice(
+        debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),
+        $this->numSkipBt
+      );
+    }
 
     // Restore the default number of backtrace items to skip
     $this->numSkipBt = 1;
@@ -438,7 +457,8 @@ class Bcons
           $type = self::TYPE_LOG;
       }
 
-      $this->buildMessage($type, $errorMsg);
+      $trace = array(array('file' => $errorFile, 'line' => $errorLine));
+      $this->buildMessage($type, $errorMsg, self::CONTENT_TEXT, $trace);
     }
 
     // Return false so the standard PHP error handler is executed
@@ -551,5 +571,31 @@ class Bcons
       $this->skipBacktrace();
       $this->buildMessage(self::TYPE_COOKIE, $_COOKIE);
     }
+  }
+
+  public function getErrorName($errorCode)
+  {
+    $errors = array(
+      E_ERROR => 'E_ERROR',
+      E_PARSE => 'E_PARSE',
+      E_CORE_ERROR => 'E_CORE_ERROR',
+      E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+      E_USER_ERROR => 'E_USER_ERROR',
+      E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+      E_WARNING => 'E_WARNING',
+      E_CORE_WARNING => 'E_CORE_WARNING',
+      E_COMPILE_WARNING => 'E_COMPILE_WARNING',
+      E_USER_WARNING => 'E_USER_WARNING',
+      E_DEPRECATED => 'E_DEPRECATED',
+      E_USER_DEPRECATED => 'E_USER_DEPRECATED',
+      E_NOTICE => 'E_NOTICE',
+      E_USER_NOTICE => 'E_USER_NOTICE',
+      E_STRICT => 'E_STRICT'
+    );
+
+    if (isset($errors[$errorCode]))
+      return $errors[$errorCode];
+
+    return 'UNKNOWN_ERROR';
   }
 }
