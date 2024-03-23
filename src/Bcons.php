@@ -20,7 +20,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.6';
+  public $version = '1.0.7';
 
   // Default options
   protected $options = array(
@@ -262,7 +262,8 @@ class Bcons
       $data = json_encode($data);
 
     // For the order we'll use the timestamp but we'll add the number of
-    // messages sent, since two consecutive calls may have the same timestamp
+    // messages sent, since two consecutive calls may end up having the same
+    // timestamp
     $ts = time();
     if (!isset($this->msgCount[$messageType]))
       $this->msgCount[$messageType] = 0;
@@ -300,6 +301,7 @@ class Bcons
       'mt' => $messageType,
       'ct' => $contentType,
       'url' => $url,
+      'v' => $_SERVER['REQUEST_METHOD'],
       'fn' => $fileName,
       'fl' => $fileLine,
       'x' => ['phpBt' => $trace],
@@ -308,8 +310,13 @@ class Bcons
     // Encrypt data if required
     if ($this->options['cryptKey'])
     {
-      $message['m'] = $this->cryptAES256($message['m']);
       $message['e'] = 1;
+      $message['m'] = $this->cryptAES256($message['m']);
+      $message['fn'] = $this->cryptAES256($message['fn']);
+      $message['fl'] = $this->cryptAES256($message['fl']);
+      $message['url'] = $this->cryptAES256($message['url']);
+      $message['v'] = $this->cryptAES256($message['v']);
+      $message['x'] = $this->cryptAES256(json_encode($message['x']));
     }
 
     $dataToSend = json_encode($message);
@@ -537,7 +544,10 @@ class Bcons
     {
       // Data may come in many formats, but the most usual is application/json
       // so we'll take care of that.
-      if ($_SERVER['HTTP_CONTENT_TYPE'] == 'application/json')
+      if (
+        isset($_SERVER['HTTP_CONTENT_TYPE']) &&
+        $_SERVER['HTTP_CONTENT_TYPE'] == 'application/json'
+      )
       {
         $request = json_decode($inputStream, true);
         $this->buildMessage(self::TYPE_REQUEST, $request);
