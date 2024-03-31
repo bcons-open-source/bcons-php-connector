@@ -20,7 +20,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.7';
+  public $version = '1.0.8';
 
   // Default options
   protected $options = array(
@@ -52,10 +52,9 @@ class Bcons
   );
 
   // Sometimes, two consecutive messages may have the same timestamp.  In this
-  // array, we'll track how many messages have been sent for each type and add
-  // that count to the timestamp to ensure they are displayed in the correct
-  // order.
-  protected $msgCount = array();
+  // array, we'll track how many messages have been sent and add that count to
+  // the timestamp to ensure they are displayed in the correct order.
+  protected $msgCount = 0;
 
   // The file name and line that are sent as the origin of the debug function
   // call are obtained by calling debug_backtrace. This value represents the
@@ -65,6 +64,13 @@ class Bcons
 
   // Max size for a message in bytes; any message larger than this will be split
   protected $maxMsgSize = 1000;
+
+  // Here we store the values for the labels of the count() method
+  protected $countValues = array();
+
+  // Here we store the stack of groups created by calls to
+  // group / groupCollapsed / groupEnd
+  protected $msgGroups = array();
 
 
   /**
@@ -129,13 +135,55 @@ class Bcons
    */
   public function log($data)
   {
-    $args = func_get_args();
-
-    if (count($args) == 1)
-      $this->buildMessage(self::TYPE_LOG, $args[0], self::CONTENT_AUTO);
-    else $this->buildMessage(self::TYPE_LOG, $args, self::CONTENT_AUTO);
+    $args = $this->parseMultipleParams(func_get_args());
+    $this->buildMessage(self::TYPE_LOG, $args, self::CONTENT_AUTO);
 
     return $this;
+  }
+
+  /**
+   * Sends a message to the "log" panel of the bcons console. It is exactly the
+   * same as calling the log method, we include it just to mimic the devtools
+   * console API as closely as possible.
+   *
+   * @param mixed $data
+   * @return Bcons
+   */
+  public function debug($data)
+  {
+    $this->skipBacktrace();
+
+    return $this->log(func_get_args());
+  }
+
+  /**
+   * Sends a message to the "log" panel of the bcons console. It is exactly the
+   * same as calling the log method, we include it just to mimic the devtools
+   * console API as closely as possible.
+   *
+   * @param mixed $data
+   * @return Bcons
+   */
+  public function dir($data)
+  {
+    $this->skipBacktrace();
+
+    return $this->log(func_get_args());
+  }
+
+  /**
+   * Sends a message to the "log" panel of the bcons console. It is exactly the
+   * same as calling the log method, we include it just to mimic the devtools
+   * console API as closely as possible.
+   *
+   * @param mixed $data
+   * @return Bcons
+   */
+  public function dirxml($data)
+  {
+    $this->skipBacktrace();
+
+    return $this->log(func_get_args());
   }
 
   /**
@@ -146,11 +194,8 @@ class Bcons
    */
   public function warn($data)
   {
-    $args = func_get_args();
-
-    if (count($args) == 1)
-      $this->buildMessage(self::TYPE_WARN, $args[0], self::CONTENT_AUTO);
-    else $this->buildMessage(self::TYPE_WARN, $args, self::CONTENT_AUTO);
+    $args = $this->parseMultipleParams(func_get_args());
+    $this->buildMessage(self::TYPE_WARN, $args, self::CONTENT_AUTO);
 
     return $this;
   }
@@ -163,11 +208,8 @@ class Bcons
    */
   public function error($data)
   {
-    $args = func_get_args();
-
-    if (count($args) == 1)
-      $this->buildMessage(self::TYPE_ERROR, $args[0], self::CONTENT_AUTO);
-    else $this->buildMessage(self::TYPE_ERROR, $args, self::CONTENT_AUTO);
+    $args = $this->parseMultipleParams(func_get_args());
+    $this->buildMessage(self::TYPE_ERROR, $args, self::CONTENT_AUTO);
 
     return $this;
   }
@@ -180,11 +222,8 @@ class Bcons
    */
   public function request($data)
   {
-    $args = func_get_args();
-
-    if (count($args) == 1)
-      $this->buildMessage(self::TYPE_REQUEST, $args[0], self::CONTENT_AUTO);
-    else $this->buildMessage(self::TYPE_REQUEST, $args, self::CONTENT_AUTO);
+    $args = $this->parseMultipleParams(func_get_args());
+    $this->buildMessage(self::TYPE_REQUEST, $args, self::CONTENT_AUTO);
 
     return $this;
   }
@@ -197,11 +236,8 @@ class Bcons
    */
   public function session($data)
   {
-    $args = func_get_args();
-
-    if (count($args) == 1)
-      $this->buildMessage(self::TYPE_SESSION, $args[0], self::CONTENT_AUTO);
-    else $this->buildMessage(self::TYPE_SESSION, $args, self::CONTENT_AUTO);
+    $args = $this->parseMultipleParams(func_get_args());
+    $this->buildMessage(self::TYPE_SESSION, $args, self::CONTENT_AUTO);
 
     return $this;
   }
@@ -214,11 +250,129 @@ class Bcons
    */
   public function cookies($data)
   {
-    $args = func_get_args();
+    $args = $this->parseMultipleParams(func_get_args());
+    $this->buildMessage(self::TYPE_COOKIE, $args, self::CONTENT_AUTO);
 
-    if (count($args) == 1)
-      $this->buildMessage(self::TYPE_COOKIE, $args[0], self::CONTENT_AUTO);
-    else $this->buildMessage(self::TYPE_COOKIE, $args, self::CONTENT_AUTO);
+    return $this;
+  }
+
+  /**
+   * Logs a message to the error panel only if the condition is false.
+   *
+   * @param boolean $condition
+   * @param string $message
+   * @return void
+   */
+  public function assert(bool $condition, string $message)
+  {
+    if (!$condition)
+    {
+      $this->skipBacktrace();
+      $this->error("Assertion failed: $message");
+    }
+  }
+
+  /**
+   * Logs the number of times this method has been called with this label as
+   * parameter ("default" if none is provided).
+   *
+   * @param string $label
+   * @return void
+   */
+  public function count($label = 'default')
+  {
+    if (isset($this->countValues[$label]))
+      ++$this->countValues[$label];
+    else $this->countValues[$label] = 1;
+
+    $this->skipBacktrace();
+    $this->log("$label: ".$this->countValues[$label]);
+  }
+
+  /**
+   * Resets the count value for the provided label ("default" if none is
+   * provided).
+   *
+   * @param string $label
+   * @return void
+   */
+  public function countReset($label = 'default')
+  {
+    $this->countValues[$label] = 0;
+  }
+
+  /**
+   * Clears all console panels.
+   *
+   * @return void
+   */
+  public function clear()
+  {
+    $extra = ['clearConsole' => true];
+
+    $this->buildMessage('l', 'Console cleared', self::CONTENT_AUTO, null, $extra);
+  }
+
+  /**
+   * Creates a new inline group in the log console, causing any subsequent
+   * messages to be indented by an additional level, until groupEnd() is called.
+   *
+   * @param string $label Label for the group
+   * @return void
+   */
+  public function group($label = '')
+  {
+    $this->createGroup($label, false);
+
+    return $this;
+  }
+
+  /**
+   * Like group(), however the new group is created collapsed.
+   *
+   * @param string $label Label for the group
+   * @return void
+   */
+  public function groupCollapsed($label = '')
+  {
+    $this->createGroup($label, true);
+    return $this;
+  }
+
+  /**
+   * Exits the current inline group in the console.
+   *
+   * @return void
+   */
+  public function groupEnd()
+  {
+    array_pop($this->msgGroups);
+
+    return $this;
+  }
+
+  /**
+   * Aux function for group and groupCollapsed.
+   *
+   * @param string $label Label for the group
+   * @param boolean $collapsed If true the group will be created collapsed
+   * @return void
+   */
+  protected function createGroup($label = '', $collapsed = false)
+  {
+    // Create the group and add it to the stack
+    if (!$label)
+      $label = 'Group '.(count($this->msgGroups) + 1);
+
+    $currentGroup = end($this->msgGroups);
+    $parentId = $currentGroup ? $currentGroup['id'] : '';
+
+    $this->msgGroups[] = [
+      'id' => bin2hex(openssl_random_pseudo_bytes(6)),
+      'parentId' => $parentId,
+      'label' => $label,
+      'collapsed' => $collapsed
+    ];
 
     return $this;
   }
@@ -233,14 +387,17 @@ class Bcons
    * @param int $contentType The data type of the message.
    * @param array $trace When capturing messages with the error handler the
    *                     backtrace is not available via debug_backtrace and
-   *                     is provided by the error handler.
+   *                     is provided by the error handler on this param.
+   * @param array $extra Any extra data that will be sent on the x member of
+   *                     the message.
    * @return void
    */
   public function buildMessage(
     $messageType,
     $data,
     $contentType = self::CONTENT_AUTO,
-    $trace = null)
+    $trace = null,
+    $extra = null)
   {
     // If no bcons user or project is set we can't send the message
     if (!$this->options['userToken'] || !$this->options['projectToken'])
@@ -265,9 +422,7 @@ class Bcons
     // messages sent, since two consecutive calls may end up having the same
     // timestamp
     $ts = time();
-    if (!isset($this->msgCount[$messageType]))
-      $this->msgCount[$messageType] = 0;
-    $count = ++$this->msgCount[$messageType];
+    $count = ++$this->msgCount;
     $order = $ts . str_pad($count, 3, '0', STR_PAD_LEFT);
 
     // Get the backtack info for this call (if not already provided)
@@ -307,9 +462,28 @@ class Bcons
       'x' => ['phpBt' => $trace],
     );
 
+    // Add extra data
+    if ($extra && is_array($extra))
+      foreach ($extra as $k => $v)
+        $message['x'][$k] = $v;
+
+    // Add the message group info, if any.
+    if (count($this->msgGroups))
+    {
+      $message['x']['groupData'] = end($this->msgGroups);
+      $message['x']['groupData']['mt'] = $message['mt'];
+
+      // By definition, all grouped messages will appear in the "log" panel.
+      $message['mt'] = 'l';
+    }
+
     // Encrypt data if required
     if ($this->options['cryptKey'])
     {
+      // Empty messages would throw an error when encrypting
+      if (!$message['m'])
+        $message['m'] = ' ';
+
       $message['e'] = 1;
       $message['m'] = $this->cryptAES256($message['m']);
       $message['fn'] = $this->cryptAES256($message['fn']);
@@ -339,11 +513,38 @@ class Bcons
         $this->options['bconsHost'],
         $this->options['bconsPort']
       );
-      if ($x && $x % 10 == 0)
-        usleep(100000);
+
+      usleep(5000);
     }
 
     socket_close($socket);
+  }
+
+  /**
+   * All methods that output data to the console admit multiple parameters. This
+   * method checks those params and, if they are all strings or number, returns
+   * a single * string with the parameters concatenated, as the console.log
+   * method of the devtools would do.
+   * Otherwise the provided array is returned and the default behaviour applies.
+   *
+   * @param array $params
+   * @return mixed
+   */
+  protected function parseMultipleParams(array $params): mixed
+  {
+    if (count($params) == 1)
+      return $params[0];
+
+    $concat = '';
+    foreach ($params as $k => $v)
+    {
+      if (!is_string($v) && !is_numeric($v))
+        return $params;
+
+      $concat .= $v.' ';
+    }
+
+    return substr($concat, 0, -1); // Remove last space
   }
 
   /**
