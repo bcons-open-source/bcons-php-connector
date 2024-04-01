@@ -20,7 +20,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.8';
+  public $version = '1.0.9';
 
   // Default options
   protected $options = array(
@@ -528,9 +528,9 @@ class Bcons
    * Otherwise the provided array is returned and the default behaviour applies.
    *
    * @param array $params
-   * @return mixed
+   * @return string|array
    */
-  protected function parseMultipleParams(array $params): mixed
+  protected function parseMultipleParams($params)
   {
     if (count($params) == 1)
       return $params[0];
@@ -720,7 +720,7 @@ class Bcons
    *
    * @return void
    */
-  protected function sendRequestPayload()
+  public function sendRequestPayload()
   {
     // Check $_GET and $_POST superglobals
     if (count($_GET) > 0 || count($_POST) > 0)
@@ -761,7 +761,7 @@ class Bcons
    *
    * @return void
    */
-  protected function sendSessionData()
+  public function sendSessionData()
   {
     if (isset($_SESSION) && count($_SESSION) > 0)
     {
@@ -775,7 +775,7 @@ class Bcons
    *
    * @return void
    */
-  protected function sendCookiesData()
+  public function sendCookiesData()
   {
     if (isset($_COOKIE) && count($_COOKIE) > 0)
     {
