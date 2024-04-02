@@ -17,10 +17,11 @@ class Bcons
   const CONTENT_TEXT = 't';
   const CONTENT_HTML = 'h';
   const CONTENT_DATA = 'd';
+  const CONTENT_TABLE = 'r';
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.9';
+  public $version = '1.0.10';
 
   // Default options
   protected $options = array(
@@ -72,6 +73,8 @@ class Bcons
   // group / groupCollapsed / groupEnd
   protected $msgGroups = array();
 
+  // Here we store date for the time / timeEnd calls
+  protected $timers = array();
 
   /**
    * The constructor may receive a string with the project token or a named
@@ -152,8 +155,25 @@ class Bcons
   public function debug($data)
   {
     $this->skipBacktrace();
+    $args = $this->parseMultipleParams(func_get_args());
 
-    return $this->log(func_get_args());
+    return $this->log($args);
+  }
+
+  /**
+   * Sends a message to the "log" panel of the bcons console. It is exactly the
+   * same as calling the log method, we include it just to mimic the devtools
+   * console API as closely as possible.
+   *
+   * @param mixed $data
+   * @return Bcons
+   */
+  public function info($data)
+  {
+    $this->skipBacktrace();
+    $args = $this->parseMultipleParams(func_get_args());
+
+    return $this->log($args);
   }
 
   /**
@@ -167,8 +187,9 @@ class Bcons
   public function dir($data)
   {
     $this->skipBacktrace();
+    $args = $this->parseMultipleParams(func_get_args());
 
-    return $this->log(func_get_args());
+    return $this->log($args);
   }
 
   /**
@@ -182,8 +203,9 @@ class Bcons
   public function dirxml($data)
   {
     $this->skipBacktrace();
+    $args = $this->parseMultipleParams(func_get_args());
 
-    return $this->log(func_get_args());
+    return $this->log($args);
   }
 
   /**
@@ -270,6 +292,8 @@ class Bcons
       $this->skipBacktrace();
       $this->error("Assertion failed: $message");
     }
+
+    return $this;
   }
 
   /**
@@ -287,6 +311,8 @@ class Bcons
 
     $this->skipBacktrace();
     $this->log("$label: ".$this->countValues[$label]);
+
+    return $this;
   }
 
   /**
@@ -299,18 +325,113 @@ class Bcons
   public function countReset($label = 'default')
   {
     $this->countValues[$label] = 0;
+
+    return $this;
+  }
+
+  /**
+   * Starts a timer you can use to track how long an operation takes.
+   *
+   * @param string $label A string representing the name to give the new timer
+   * @return void
+   */
+  public function time($label = 'default')
+  {
+    $this->timers[$label] = microtime(true) * 1000;
+
+    return $this;
+  }
+
+  /**
+   * Stops a timer that was previously started by calling time()
+   *
+   * @param string $label A string representing the name of the timer to stop
+   * @return void
+   */
+  public function timeEnd($label = 'default')
+  {
+    $this->skipBacktrace();
+
+    return $this->timeLog($label);
+  }
+
+  /**
+   * Logs the current value of a timer that was previously started by calling
+   * time(). Any
+   *
+   * @param string $label The name of the timer to log to the console
+   * @return void
+   */
+  public function timeLog($label = 'default')
+  {
+    $this->skipBacktrace();
+
+    $args = func_get_args();
+    $label = array_shift($args);
+
+    if (!$this->timers[$label])
+    {
+      $this->warn('w', "Timer '$label' does not exist ");
+      return;
+    }
+
+    $diff = (microtime(true) * 1000) - $this->timers[$label];
+
+    array_unshift($args, "$label: $diff ms");
+    $args = $this->parseMultipleParams($args);
+
+    return $this->log($args);
+  }
+
+  /**
+   * Outputs a stack trace to the console
+   *
+   * @return void
+   */
+  public function trace()
+  {
+    $extra = ['traceIsMsg' => true];
+
+    $this->buildMessage('l', ' ', self::CONTENT_AUTO, null, $extra);
+
+    return $this;
   }
 
   /**
    * Clears all console panels.
    *
+   * @param bool $showInfo If true (default) a message with "Console cleared"
+   *                       will be shown, otherwise the console will be cleared
+   *                       with no messages.
    * @return void
    */
-  public function clear()
+  public function clear($showInfo = true)
   {
-    $extra = ['clearConsole' => true];
+    $extra = ['clearConsole' => true, 'showClearInfo' => $showInfo];
 
     $this->buildMessage('l', 'Console cleared', self::CONTENT_AUTO, null, $extra);
+  }
+
+  /**
+   * Displays tabular data as a table.
+   *
+   * @param array $value The data to display.
+   * @param array $columns An array containing the names of columns to include
+   *                       in the output.
+   * @return void
+   */
+  public function table($value, $columns = array())
+  {
+    if (!is_array($value))
+      return $this;
+
+    $extra = array();
+    if (isset($columns))
+      $extra = ['columns' => $columns];
+
+    $this->buildMessage(self::TYPE_LOG, $value, self::CONTENT_TABLE, null, $extra);
+
+    return $this;
   }
 
   /**
@@ -318,11 +439,12 @@ class Bcons
    * messages to be indented by an additional level, until groupEnd() is called.
    *
    * @param string $label Label for the group
+   * @param string $style See createGroup() for more information
    * @return void
    */
-  public function group($label = '')
+  public function group($label = '', $style = '')
   {
-    $this->createGroup($label, false);
+    $this->createGroup($label, false, $style);
 
     return $this;
   }
@@ -331,11 +453,12 @@ class Bcons
    * Like group(), however the new group is created collapsed.
    *
    * @param string $label Label for the group
+   * @param string $style See createGroup() for more information
    * @return void
    */
-  public function groupCollapsed($label = '')
+  public function groupCollapsed($label = '', $style = '')
   {
-    $this->createGroup($label, true);
+    $this->createGroup($label, true, $style);
     return $this;
   }
 
@@ -356,9 +479,19 @@ class Bcons
    *
    * @param string $label Label for the group
    * @param boolean $collapsed If true the group will be created collapsed
+   * @param string $style Additional style for the group. It may be either a
+   *                      hex rgb color in #RRGGBB string (which will be used
+   *                      for the background color of the group) or a string
+   *                      that will be used as CSS class name for the details
+   *                      HTML element.
+   *                      Classes "group1" to "group12" are predefined in the
+   *                      console with optimized colors for light and dark
+   *                      themes. They are also available with the named classes
+   *                      red, sienna, olive, green, lime, jade, teal, blue,
+   *                      purple, indigo, magenta and rosewood.
    * @return void
    */
-  protected function createGroup($label = '', $collapsed = false)
+  protected function createGroup($label = '', $collapsed = false, $style = '')
   {
     // Create the group and add it to the stack
     if (!$label)
@@ -371,7 +504,8 @@ class Bcons
       'id' => bin2hex(openssl_random_pseudo_bytes(6)),
       'parentId' => $parentId,
       'label' => $label,
-      'collapsed' => $collapsed
+      'collapsed' => $collapsed,
+      'style' => $style
     ];
 
     return $this;
@@ -415,7 +549,10 @@ class Bcons
     if ($dataType == 'NULL')
       $data = 'NULL';
 
-    if ($contentType == self::CONTENT_DATA)
+    if (
+      $contentType == self::CONTENT_DATA ||
+      $contentType == self::CONTENT_TABLE
+    )
       $data = json_encode($data);
 
     // For the order we'll use the timestamp but we'll add the number of
