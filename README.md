@@ -3,13 +3,21 @@ This package enables you to send messages from your PHP code to your bcons conso
 
 Please visit the demo page TODO links!! to see it in action, and consult the documentation for a detailed explanation of all available options.
 
-![bcons console in a devtool panel](https://bcons.dev/img/bconsScreenshot1.png)
-![bcons messages shown in the devtools console](https://bcons.dev/img/bconsScreenshot2.png)
-![Warning messages](https://bcons.dev/img/bconsScreenshot3.png)
-![Error messages](https://bcons.dev/img/bconsScreenshot4.png)
-![Payload sent to the server](https://bcons.dev/img/bconsScreenshot5.png)
-![Session data](https://bcons.dev/img/bconsScreenshot6.png)
-![Cookies data](https://bcons.dev/img/bconsScreenshot7.png)
+![![bcons console in a devtools panel](https://bcons.dev/img/bconsScreenshot1.png)](https://bcons.dev/img/bconsScreenshot1thumb.png)
+
+
+![![bcons messages shown in the devtools console](https://bcons.dev/img/bconsScreenshot2.png)](https://bcons.dev/img/bconsScreenshot2thumb.png)
+
+
+![![Warning messages](https://bcons.dev/img/bconsScreenshot3.png)](https://bcons.dev/img/bconsScreenshot3thumb.png)
+
+![![Error messages](https://bcons.dev/img/bconsScreenshot4.png)](https://bcons.dev/img/bconsScreenshot4thumb.png)
+
+![![Payload sent to the server](https://bcons.dev/img/bconsScreenshot5.png)](https://bcons.dev/img/bconsScreenshot5thumb.png)
+
+![![Session data](https://bcons.dev/img/bconsScreenshot6.png)](https://bcons.dev/img/bconsScreenshot6thumb.png)
+
+![![Cookies data](https://bcons.dev/img/bconsScreenshot7.png)](https://bcons.dev/img/bconsScreenshot7thumb.png)
 
 ## Requirements
 This package requires only PHP >= 5.3, allowing its use in legacy code (where it is most needed 😅).
