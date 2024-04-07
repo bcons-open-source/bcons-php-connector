@@ -5,23 +5,9 @@ Please visit the demo page TODO links!! to see it in action, and consult the doc
 
 # Screenshots
 
-<table>
-  <tr>
 
-    <td><a href="https://bcons.dev/img/bconsScreenshot1.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot1thumb.png" alt="bcons console in a devtools panel"></a></td>
+<a href="https://bcons.dev/img/bconsScreenshot1.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot1thumb.png" alt="bcons console in a devtools panel"></a>  <a href="https://bcons.dev/img/bconsScreenshot2.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot2thumb.png" alt="bcons messages shown in the devtools console"></a> <a href="https://bcons.dev/img/bconsScreenshot3.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot3thumb.png" alt="Warning messages"></a> <a href="https://bcons.dev/img/bconsScreenshot4.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot4thumb.png" alt="Error messages"></a> <a href="https://bcons.dev/img/bconsScreenshot5.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot5thumb.png" alt="Payload sent to the server"></a> <a href="https://bcons.dev/img/bconsScreenshot6.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot6thumb.png" alt="Session data"></a> <a href="https://bcons.dev/img/bconsScreenshot7.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot7thumb.png" alt="Cookies data"></a>
 
-    <td><a href="https://bcons.dev/img/bconsScreenshot2.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot2thumb.png" alt="bcons messages shown in the devtools console"></a></td>
-
-    <td><a href="https://bcons.dev/img/bconsScreenshot3.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot3thumb.png" alt="Warning messages"></a></td>
-
-    <td><a href="https://bcons.dev/img/bconsScreenshot4.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot4thumb.png" alt="Error messages"></a></td>
-
-    <td><a href="https://bcons.dev/img/bconsScreenshot5.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot5thumb.png" alt="Payload sent to the server"></a></td>
-
-    <td><a href="https://bcons.dev/img/bconsScreenshot6.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot6thumb.png" alt="Session data"></a></td>
-
-    <td><a href="https://bcons.dev/img/bconsScreenshot7.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot7thumb.png" alt="Cookies data"></a></td>
-</tr></table>
 
 ## Requirements
 This package requires only PHP >= 5.3, allowing its use in legacy code (where it is most needed 😅).
