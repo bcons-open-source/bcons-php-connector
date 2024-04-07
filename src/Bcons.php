@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.10';
+  public $version = '1.0.11';
 
   // Default options
   protected $options = array(
@@ -410,6 +410,8 @@ class Bcons
     $extra = ['clearConsole' => true, 'showClearInfo' => $showInfo];
 
     $this->buildMessage('l', 'Console cleared', self::CONTENT_AUTO, null, $extra);
+
+    return $this;
   }
 
   /**
@@ -471,6 +473,9 @@ class Bcons
   {
     array_pop($this->msgGroups);
 
+    $extra = ['groupEnd' => true];
+    $this->buildMessage(self::TYPE_LOG, ' ', self::CONTENT_AUTO, null, $extra);
+
     return $this;
   }
 
@@ -484,11 +489,13 @@ class Bcons
    *                      for the background color of the group) or a string
    *                      that will be used as CSS class name for the details
    *                      HTML element.
-   *                      Classes "group1" to "group12" are predefined in the
+   *                      Classes "group1" to "group22" are predefined in the
    *                      console with optimized colors for light and dark
    *                      themes. They are also available with the named classes
-   *                      red, sienna, olive, green, lime, jade, teal, blue,
-   *                      purple, indigo, magenta and rosewood.
+   *                      red, orange, amber, yellow, lime, green, emerald,
+   *                      teal, cyan, sky, blue, indigo, violet, purple,
+   *                      fuchsia, pink, rose, stone, neutral, zinc, gray and
+   *                      slate.
    * @return void
    */
   protected function createGroup($label = '', $collapsed = false, $style = '')
