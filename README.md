@@ -3,24 +3,25 @@ This package enables you to send messages from your PHP code to your bcons conso
 
 Please visit the demo page TODO links!! to see it in action, and consult the documentation for a detailed explanation of all available options.
 
-<p align="center">
+# Screenshots
 
-<a href="https://bcons.dev/img/bconsScreenshot1.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot1thumb.png" alt="bcons console in a devtools panel"></a>
+<table>
+  <tr>
 
-<a href="https://bcons.dev/img/bconsScreenshot2.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot2thumb.png" alt="bcons messages shown in the devtools console"></a>
+    <td><a href="https://bcons.dev/img/bconsScreenshot1.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot1thumb.png" alt="bcons console in a devtools panel"></a></td>
 
-<a href="https://bcons.dev/img/bconsScreenshot3.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot3thumb.png" alt="Warning messages"></a>
+    <td><a href="https://bcons.dev/img/bconsScreenshot2.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot2thumb.png" alt="bcons messages shown in the devtools console"></a></td>
 
-<a href="https://bcons.dev/img/bconsScreenshot4.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot4thumb.png" alt="Error messages"></a>
+    <td><a href="https://bcons.dev/img/bconsScreenshot3.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot3thumb.png" alt="Warning messages"></a></td>
 
-<a href="https://bcons.dev/img/bconsScreenshot5.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot5thumb.png" alt="Payload sent to the server"></a>
+    <td><a href="https://bcons.dev/img/bconsScreenshot4.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot4thumb.png" alt="Error messages"></a></td>
 
-<a href="https://bcons.dev/img/bconsScreenshot6.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot6thumb.png" alt="Session data"></a>
+    <td><a href="https://bcons.dev/img/bconsScreenshot5.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot5thumb.png" alt="Payload sent to the server"></a></td>
 
-<a href="https://bcons.dev/img/bconsScreenshot7.png" target="_blank"><img style="height:100px" src="https://bcons.dev/img/bconsScreenshot7thumb.png" alt="Cookies data"></a>
+    <td><a href="https://bcons.dev/img/bconsScreenshot6.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot6thumb.png" alt="Session data"></a></td>
 
-</p>
-
+    <td><a href="https://bcons.dev/img/bconsScreenshot7.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot7thumb.png" alt="Cookies data"></a></td>
+</tr></table>
 
 ## Requirements
 This package requires only PHP >= 5.3, allowing its use in legacy code (where it is most needed 😅).
