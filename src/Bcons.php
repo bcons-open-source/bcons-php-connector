@@ -52,8 +52,8 @@ class Bcons
     'sendCookiesDataOnStart' => true
   );
 
-  // Sometimes, two consecutive messages may have the same timestamp.  In this
-  // array, we'll track how many messages have been sent and add that count to
+  // Sometimes, two consecutive messages may have the same timestamp. Here
+  // we'll track how many messages have been sent and add that count to
   // the timestamp to ensure they are displayed in the correct order.
   protected $msgCount = 0;
 
@@ -802,11 +802,11 @@ class Bcons
         case E_NOTICE:
         case E_USER_NOTICE:
         case E_STRICT:
-          $type = self::TYPE_LOG;
+          $type = self::TYPE_WARN;
           break;
 
         default:
-          $type = self::TYPE_LOG;
+          $type = self::TYPE_WARN;
       }
 
       $trace = array(array('file' => $errorFile, 'line' => $errorLine));
