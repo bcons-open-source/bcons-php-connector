@@ -441,12 +441,12 @@ class Bcons
    * messages to be indented by an additional level, until groupEnd() is called.
    *
    * @param string $label Label for the group
-   * @param string $style See createGroup() for more information
+   * @param string $className See createGroup() for more information
    * @return void
    */
-  public function group($label = '', $style = '')
+  public function group($label = '', $className = '')
   {
-    $this->createGroup($label, false, $style);
+    $this->createGroup($label, false, $className);
 
     return $this;
   }
@@ -455,12 +455,12 @@ class Bcons
    * Like group(), however the new group is created collapsed.
    *
    * @param string $label Label for the group
-   * @param string $style See createGroup() for more information
+   * @param string $className See createGroup() for more information
    * @return void
    */
-  public function groupCollapsed($label = '', $style = '')
+  public function groupCollapsed($label = '', $className = '')
   {
-    $this->createGroup($label, true, $style);
+    $this->createGroup($label, true, $className);
     return $this;
   }
 
@@ -484,21 +484,17 @@ class Bcons
    *
    * @param string $label Label for the group
    * @param boolean $collapsed If true the group will be created collapsed
-   * @param string $style Additional style for the group. It may be either a
-   *                      hex rgb color in #RRGGBB string (which will be used
-   *                      for the background color of the group) or a string
-   *                      that will be used as CSS class name for the details
-   *                      HTML element.
-   *                      Classes "group1" to "group22" are predefined in the
-   *                      console with optimized colors for light and dark
-   *                      themes. They are also available with the named classes
-   *                      red, orange, amber, yellow, lime, green, emerald,
-   *                      teal, cyan, sky, blue, indigo, violet, purple,
-   *                      fuchsia, pink, rose, stone, neutral, zinc, gray and
-   *                      slate.
+   * @param string $className CSS class name for the details HTML element.
+   *                          Classes "group1" to "group22" are predefined in
+   *                          the console with optimized colors for light and
+   *                          dark themes. They are also available with the
+   *                          named classes red, orange, amber, yellow, lime,
+   *                          green, emerald, teal, cyan, sky, blue, indigo,
+   *                          violet, purple, fuchsia, pink, rose, stone,
+   *                          neutral, zinc, gray and slate.
    * @return void
    */
-  protected function createGroup($label = '', $collapsed = false, $style = '')
+  protected function createGroup($label = '', $collapsed = false, $className = '')
   {
     // Create the group and add it to the stack
     if (!$label)
@@ -512,7 +508,7 @@ class Bcons
       'parentId' => $parentId,
       'label' => $label,
       'collapsed' => $collapsed,
-      'style' => $style
+      'style' => $className
     ];
 
     return $this;
@@ -548,7 +544,7 @@ class Bcons
     $dataType = gettype($data);
 
     if ($contentType == self::CONTENT_AUTO)
-      $contentType = $this->getContentType($data);
+      $contentType = $this->contentType($data);
 
     if ($dataType == 'boolean')
       $data = $data ? 'true' : 'false';
@@ -584,7 +580,7 @@ class Bcons
     // Add to each backtrace entry the code line
     foreach ($trace as $k => $v)
       if (isset($v['file']) && isset($v['line']))
-        $trace[$k]['code'] = $this->getLineFromFile($v['file'], $v['line']);
+        $trace[$k]['code'] = $this->lineFromFile($v['file'], $v['line']);
 
     $fileName = isset($trace[0]['file']) ? $trace[0]['file'] : '';
     $fileLine = isset($trace[0]['line']) ? $trace[0]['line'] : '';
@@ -601,6 +597,7 @@ class Bcons
       'ct' => $contentType,
       'url' => $url,
       'v' => $_SERVER['REQUEST_METHOD'],
+      'h' => $_SERVER['HTTP_HOST'],
       'fn' => $fileName,
       'fl' => $fileLine,
       'x' => ['phpBt' => $trace],
@@ -708,7 +705,7 @@ class Bcons
    * @param mixed $data The message data
    * @return int
    */
-  protected function getContentType($data)
+  protected function contentType($data)
   {
     $type = gettype($data);
 
@@ -845,7 +842,7 @@ class Bcons
    * @param int $lineNumber
    * @return string
    */
-  protected function getLineFromFile($file, $lineNumber)
+  protected function lineFromFile($file, $lineNumber)
   {
     $f = fopen($file, 'r');
     $count = 1;
@@ -928,7 +925,7 @@ class Bcons
     }
   }
 
-  public function getErrorName($errorCode)
+  public function errorName($errorCode)
   {
     $errors = array(
       E_ERROR => 'E_ERROR',
