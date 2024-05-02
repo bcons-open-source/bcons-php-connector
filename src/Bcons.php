@@ -508,10 +508,8 @@ class Bcons
     if (is_numeric($className))
       $className = 'group' . $className;
 
-    //error_log(print_r($args, 1));
     $args = func_get_args();
     array_shift($args);
-    error_log(print_r($args, 1));
     $args = $this->parseMultipleParams($args);
 
     $extra = ['style' => $className];
