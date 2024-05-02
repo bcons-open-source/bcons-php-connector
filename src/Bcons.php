@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.12';
+  public $version = '1.0.13';
 
   // Default options
   protected $options = array(
@@ -283,7 +283,7 @@ class Bcons
    *
    * @param boolean $condition
    * @param string $message
-   * @return void
+   * @return Bcons
    */
   public function assert(bool $condition, string $message)
   {
@@ -301,7 +301,7 @@ class Bcons
    * parameter ("default" if none is provided).
    *
    * @param string $label
-   * @return void
+   * @return Bcons
    */
   public function count($label = 'default')
   {
@@ -320,7 +320,7 @@ class Bcons
    * provided).
    *
    * @param string $label
-   * @return void
+   * @return Bcons
    */
   public function countReset($label = 'default')
   {
@@ -333,7 +333,7 @@ class Bcons
    * Starts a timer you can use to track how long an operation takes.
    *
    * @param string $label A string representing the name to give the new timer
-   * @return void
+   * @return Bcons
    */
   public function time($label = 'default')
   {
@@ -346,7 +346,7 @@ class Bcons
    * Stops a timer that was previously started by calling time()
    *
    * @param string $label A string representing the name of the timer to stop
-   * @return void
+   * @return Bcons
    */
   public function timeEnd($label = 'default')
   {
@@ -360,7 +360,7 @@ class Bcons
    * time(). Any
    *
    * @param string $label The name of the timer to log to the console
-   * @return void
+   * @return Bcons
    */
   public function timeLog($label = 'default')
   {
@@ -386,7 +386,7 @@ class Bcons
   /**
    * Outputs a stack trace to the console
    *
-   * @return void
+   * @return Bcons
    */
   public function trace()
   {
@@ -403,7 +403,7 @@ class Bcons
    * @param bool $showInfo If true (default) a message with "Console cleared"
    *                       will be shown, otherwise the console will be cleared
    *                       with no messages.
-   * @return void
+   * @return Bcons
    */
   public function clear($showInfo = true)
   {
@@ -420,7 +420,7 @@ class Bcons
    * @param array $value The data to display.
    * @param array $columns An array containing the names of columns to include
    *                       in the output.
-   * @return void
+   * @return Bcons
    */
   public function table($value, $columns = array())
   {
@@ -442,7 +442,7 @@ class Bcons
    *
    * @param string $label Label for the group
    * @param string $className See createGroup() for more information
-   * @return void
+   * @return Bcons
    */
   public function group($label = '', $className = '')
   {
@@ -456,7 +456,7 @@ class Bcons
    *
    * @param string $label Label for the group
    * @param string $className See createGroup() for more information
-   * @return void
+   * @return Bcons
    */
   public function groupCollapsed($label = '', $className = '')
   {
@@ -467,7 +467,7 @@ class Bcons
   /**
    * Exits the current inline group in the console.
    *
-   * @return void
+   * @return Bcons
    */
   public function groupEnd()
   {
@@ -475,6 +475,54 @@ class Bcons
 
     $extra = ['groupEnd' => true];
     $this->buildMessage(self::TYPE_LOG, ' ', self::CONTENT_AUTO, null, $extra);
+
+    return $this;
+  }
+
+  /**
+   * Sends a message indicating the script reached a certain file line.
+   * @param string $caption Optional
+   *
+   * @return Bcons
+   */
+  public function ping($caption = '')
+  {
+    if (!$caption)
+      $caption = '  ';
+    $extra = ['ping' => $caption];
+
+    $this->buildMessage('l', ' ', self::CONTENT_AUTO, null, $extra);
+
+    return $this;
+  }
+
+  /**
+   * Same as log but the first parameter is a color identifier (see
+   * createGroup() for details).
+   *
+   * @param mixed $className
+   * @return void
+   */
+  public function clog($className)
+  {
+    if (is_numeric($className))
+      $className = 'group' . $className;
+
+    //error_log(print_r($args, 1));
+    $args = func_get_args();
+    array_shift($args);
+    error_log(print_r($args, 1));
+    $args = $this->parseMultipleParams($args);
+
+    $extra = ['style' => $className];
+
+    $this->buildMessage(
+      self::TYPE_LOG,
+      $args,
+      self::CONTENT_AUTO,
+      null,
+      $extra
+    );
 
     return $this;
   }
@@ -492,6 +540,8 @@ class Bcons
    *                          green, emerald, teal, cyan, sky, blue, indigo,
    *                          violet, purple, fuchsia, pink, rose, stone,
    *                          neutral, zinc, gray and slate.
+   *                          If an int X is provided it will be expanded to
+   *                          groupX.
    * @return void
    */
   protected function createGroup($label = '', $collapsed = false, $className = '')
@@ -502,6 +552,9 @@ class Bcons
 
     $currentGroup = end($this->msgGroups);
     $parentId = $currentGroup ? $currentGroup['id'] : '';
+
+    if (is_numeric($className))
+      $className = 'group' . $className;
 
     $this->msgGroups[] = [
       'id' => bin2hex(openssl_random_pseudo_bytes(6)),
@@ -631,6 +684,7 @@ class Bcons
       $message['fl'] = $this->cryptAES256($message['fl']);
       $message['url'] = $this->cryptAES256($message['url']);
       $message['v'] = $this->cryptAES256($message['v']);
+      $message['h'] = $this->cryptAES256($message['h']);
       $message['x'] = $this->cryptAES256(json_encode($message['x']));
     }
 
