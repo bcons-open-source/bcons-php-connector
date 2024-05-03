@@ -79,13 +79,14 @@ We have added some extra functions for a better debugging experience:
 
 - ping: sometimes we just need to know that our script has reached a certain point. This function does just that: it displays the file name and line number, consuming little vertical space. You can add an optional caption.
   ```php
-$console->ping('Begin checkout process');
-```
-<img src="https://bcons.dev/img/pingLight.png">
+  $console->ping('Begin checkout process');
+  ```
+  <img src="https://bcons.dev/img/pingLight.png">
+
 
 - clog: this function behaves like a regular log() call but displays the content in any of the 22 colors available for the group() function. Useful when you have many messages and want to emphasize one.
   ```php
   for ($x = 1; $x < 23; ++$x)
     $console->clog($x, "Message with color $x");
-```
-<img src="https://bcons.dev/img/clogLight.png">
+  ```
+  <img src="https://bcons.dev/img/clogLight.png">
