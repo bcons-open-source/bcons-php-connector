@@ -72,3 +72,20 @@ All these messages are displayed in the bcons console, which you can access via 
 - In the devtools console, the [table](https://developer.mozilla.org/en-US/docs/Web/API/console/table_static) method displays a table with clickable headers to sort data by that column value. This sorting feature is not yet available in the bcons console.
 
 - The [debug](https://developer.mozilla.org/en-US/docs/Web/API/console/debug_static), [info](https://developer.mozilla.org/en-US/docs/Web/API/console/info_static), [dir](https://developer.mozilla.org/en-US/docs/Web/API/console/dir_static) and [dirxml](https://developer.mozilla.org/en-US/docs/Web/API/console/dirxml_static) methods are all aliases of [log](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static).
+
+## Extra functions
+
+We have added some extra functions for a better debugging experience:
+
+- ping: sometimes we just need to know that our script has reached a certain point. This function does just that: it displays the file name and line number, consuming little vertical space. You can add an optional caption.
+  ```php
+$console->ping('Begin checkout process');
+```
+<img src="https://bcons.dev/img/pingLight.png">
+
+- clog: this function behaves like a regular log() call but displays the content in any of the 22 colors available for the group() function. Useful when you have many messages and want to emphasize one.
+  ```php
+  for ($x = 1; $x < 23; ++$x)
+    $console->clog($x, "Message with color $x");
+```
+<img src="https://bcons.dev/img/clogLight.png">
