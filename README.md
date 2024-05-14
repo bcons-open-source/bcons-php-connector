@@ -69,8 +69,6 @@ All these messages are displayed in the bcons console, which you can access via 
 
 - In the devtools console, a call to [clear](https://developer.mozilla.org/en-US/docs/Web/API/console/clear_static) clears the console and displays a `Console cleared` message. The bcons clear method accepts an optional boolean parameter; if set to false, that message is not displayed.
 
-- In the devtools console, the [table](https://developer.mozilla.org/en-US/docs/Web/API/console/table_static) method displays a table with clickable headers to sort data by that column value. This sorting feature is not yet available in the bcons console.
-
 - The [debug](https://developer.mozilla.org/en-US/docs/Web/API/console/debug_static), [info](https://developer.mozilla.org/en-US/docs/Web/API/console/info_static), [dir](https://developer.mozilla.org/en-US/docs/Web/API/console/dir_static) and [dirxml](https://developer.mozilla.org/en-US/docs/Web/API/console/dirxml_static) methods are all aliases of [log](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static).
 
 ## Extra functions
