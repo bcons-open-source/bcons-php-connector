@@ -62,9 +62,9 @@ All methods can be chained:
 $console->group('User info')->log($userData)->warn('No zip code available')->groupEnd();
 ```
 
-## Where are all these messages displayed?
+## Where are these messages displayed?
 
-All these messages are displayed in the bcons console, which you can access via the bcons website (log in and navigate to the [Console](https://bcons.dev/console) page) or through the browser extension devtools panel. They will also appear in your browser's devtools console.
+Messages are displayed in the bcons console, which you can access via the bcons website (log in and navigate to the [Console](https://bcons.dev/console) page) or through the browser extension devtools panel. They will also appear in your browser's devtools console.
 
 ## Console API support notes
 
