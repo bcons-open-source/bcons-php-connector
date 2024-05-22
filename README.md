@@ -1,16 +1,15 @@
 # bcons PHP connector
 This package enables you to send messages from your PHP code to the bcons console.
 
-Please visit the demo page TODO links!! to see it in action, and consult the documentation for a detailed explanation of all available options.
+It allows you to perform debugging tasks, such as logging messages or the values of variables at set points in your code, displaying errors and warnings, and tracking session, cookies, and payload data.
 
 # Screenshots
-
 
 <a href="https://bcons.dev/img/bconsScreenshot1.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot1thumb.png" alt="bcons console in a devtools panel"></a>  <a href="https://bcons.dev/img/bconsScreenshot2.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot2thumb.png" alt="bcons messages shown in the devtools console"></a> <a href="https://bcons.dev/img/bconsScreenshot3.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot3thumb.png" alt="Warning messages"></a> <a href="https://bcons.dev/img/bconsScreenshot4.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot4thumb.png" alt="Error messages"></a> <a href="https://bcons.dev/img/bconsScreenshot5.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot5thumb.png" alt="Payload sent to the server"></a> <a href="https://bcons.dev/img/bconsScreenshot6.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot6thumb.png" alt="Session data"></a> <a href="https://bcons.dev/img/bconsScreenshot7.png" target="_blank"><img style="height:100px;" src="https://bcons.dev/img/bconsScreenshot7thumb.png" alt="Cookies data"></a>
 
 
 ## Requirements
-This package requires only PHP >= 5.3, allowing its use in legacy code (where it is most needed 😅).
+This package requires only PHP >= 5.3, allowing its use in legacy code (where it is most needed 😅). Also, make sure that the PHP sockets extension is installed.
 
 You will also need a bcons account (there is a 'free forever' plan for 1 user and 1 project) and the free bcons browser extension.
 
