@@ -66,7 +66,9 @@ All these messages are displayed in the bcons console, which you can access via 
 
 - The [group](https://developer.mozilla.org/en-US/docs/Web/API/console/group_static) and [groupCollapsed](https://developer.mozilla.org/en-US/docs/Web/API/console/groupcollapsed_static) methods accept a second parameter that will be used as the CSS class name for the `details` element used to display the group data.
 
-  Classes `group1` to `group22` are predefined in the bcons console with optimized colors for light and dark themes (you can also pass just a number between 1 and 22). They are also available with the named classes `red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`, `stone`, `neutral`, `zinc`, `gray` and `slate` (see [Tailwind Color Palette](https://tailwindcolor.com)). Colored groups are exclusive to the bcons console. When a colored group is displayed in the devtools console, it appears as a regular group.
+  Classes `group1` to `group22` are predefined in the bcons console with optimized colors for light and dark themes (you can also pass just a number between 1 and 22). They are also available with the named classes `red`, `orange`, `amber`, `yellow`, `lime`, `green`, `emerald`, `teal`, `cyan`, `sky`, `blue`, `indigo`, `violet`, `purple`, `fuchsia`, `pink`, `rose`, `stone`, `neutral`, `zinc`, `gray` and `slate` (see [Tailwind Color Palette](https://tailwindcolor.com)).
+
+  <small>Colored groups are exclusive to the bcons console. When a colored group is displayed in the devtools console, it appears as a regular group.</small>
 
 - In the devtools console, a call to [clear](https://developer.mozilla.org/en-US/docs/Web/API/console/clear_static) clears the console and displays a `Console cleared` message. The bcons clear method accepts an optional boolean parameter; if set to false, that message is not displayed.
 
