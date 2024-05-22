@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.13';
+  public $version = '1.0.14';
 
   // Default options
   protected $options = array(
@@ -688,7 +688,20 @@ class Bcons
 
     $dataToSend = json_encode($message);
 
-    // Create socket
+    if (!function_exists('socket_create'))
+      $this->sendTcpMessage($dataToSend);
+    else $this->sendUdpMessage($dataToSend);
+  }
+
+  /**
+   * Sends the message data via UDP. This is the preferred way since it is
+   * much faster than a regular TCP connection.
+   *
+   * @param string $dataToSend Message data to send, JSON.
+   * @return void
+   */
+  public function sendUdpMessage(string $dataToSend)
+  {
     $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
     // Split message into chunks
@@ -711,6 +724,32 @@ class Bcons
     }
 
     socket_close($socket);
+  }
+
+  /**
+   * Sends the message data via TCP. This has a TCP connection overhead and
+   * is only used if the sockets extension is not available.
+   *
+   * @param string $dataToSend Message data to send, JSON.
+   * @return void
+   */
+  public function sendTcpMessage(string $dataToSend)
+  {
+    $url = 'https://bcons.dev/api/bconsMessage';
+    $data = array('message' => $dataToSend);
+    $jsonData = json_encode($data);
+
+    $options = array(
+      'http' => array(
+        'header'  => "Content-Type: application/json\r\n" .
+                     "Content-Length: " . strlen($jsonData) . "\r\n",
+        'method'  => 'POST',
+        'content' => $jsonData,
+      )
+    );
+
+    $context = stream_context_create($options);
+    file_get_contents($url, false, $context);
   }
 
   /**
