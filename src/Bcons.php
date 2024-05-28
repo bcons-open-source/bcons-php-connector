@@ -21,12 +21,14 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.14';
+  public $version = '1.0.15';
 
   // Default options
   protected $options = array(
     // The token of this project
     'projectToken' => null,
+    // If set to true the class won't send any messages
+    'disabled' => false,
     // The token of the user who requested the URL that sends the debug message.
     // The browser extension sends this value in the HTTP request header
     // 'Bcons-User'.
@@ -78,7 +80,7 @@ class Bcons
 
   /**
    * The constructor may receive a string with the project token or a named
-   * array where the keys set will overwrite its default values set in the
+   * array where the keys set will overwrite the default values in the
    * $options member.
    * @param mixed $customOptions
    */
@@ -93,6 +95,10 @@ class Bcons
         if (isset($customOptions[$k]))
           $this->options[$k] = $customOptions[$k];
     }
+
+    // If the class is disabled we don't have to do anything else
+    if ($this->options['disabled'])
+      return;
 
     // If user token not provided look for it in request header
     if (
@@ -587,8 +593,13 @@ class Bcons
     $trace = null,
     $extra = null)
   {
-    // If no bcons user or project is set we can't send the message
-    if (!$this->options['userToken'] || !$this->options['projectToken'])
+    // If the class is disabled, or no bcons user or project is set we can't
+    // send the message
+    if (
+      $this->options['disabled'] ||
+      !$this->options['userToken'] ||
+      !$this->options['projectToken']
+    )
       return;
 
     // Set content type and format data accordingly
