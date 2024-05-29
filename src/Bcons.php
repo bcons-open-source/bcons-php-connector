@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.15';
+  public $version = '1.0.16';
 
   // Default options
   protected $options = array(
@@ -38,8 +38,8 @@ class Bcons
     // You should never send any data through the Internet unencrypted, so we
     // strongly recommend setting a passphrase here.
     'cryptKey' => null,
-    // bcons will send messages for the error codes listed in this array.
-    'reportErrorCodes' => array(E_ALL),
+    // bcons will send messages for the error levels listed in this array.
+    'reportErrorLevels' => array(E_ALL),
     // The bcons server to which messages are sent
     'bconsHost' => 'apps.bcons.dev',
     'bconsPort' => 61947,
@@ -870,8 +870,8 @@ class Bcons
   {
     // Should we send a message?
     if (
-      in_array(E_ALL, $this->options['reportErrorCodes']) ||
-      in_array($errorNumber, $this->options['reportErrorCodes'])
+      in_array(E_ALL, $this->options['reportErrorLevels']) ||
+      in_array($errorNumber, $this->options['reportErrorLevels'])
     )
     {
       // Set the message type
