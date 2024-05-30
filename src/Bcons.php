@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.16';
+  public $version = '1.0.17';
 
   // Default options
   protected $options = array(
@@ -765,10 +765,12 @@ class Bcons
 
   /**
    * All methods that output data to the console admit multiple parameters. This
-   * method checks those params and, if they are all strings or number, returns
-   * a single * string with the parameters concatenated, as the console.log
-   * method of the devtools would do.
+   * method checks those params and, if they are all strings or numbers,
+   * returns a single string with the parameters concatenated, as the
+   * console.log method of the devtools would do.
    * Otherwise the provided array is returned and the default behaviour applies.
+   * String substitution placeholders %s, %i, %d, %f, %o, %c are allowed and
+   * work as expected.
    *
    * @param array $params
    * @return string|array
@@ -778,6 +780,10 @@ class Bcons
     if (count($params) == 1)
       return $params[0];
 
+    // Perform string substitution
+    $params = $this->stringSubstitute($params);
+
+    // Now, if all params are strings or numbers, concatenate them
     $concat = '';
     foreach ($params as $k => $v)
     {
@@ -788,6 +794,85 @@ class Bcons
     }
 
     return substr($concat, 0, -1); // Remove last space
+  }
+
+  /**
+   * Performs string substitution using an array of parameters. The first
+   * parameter is the string where substitution is performed.
+   *
+   * @param array $params
+   * @return array The array of parameters but with all strings substituted.
+   */
+  protected function stringSubstitute($params)
+  {
+    // Perform string substitution.
+    $template = array_shift($params);
+    $styleTagOpened = false;
+
+    $template = preg_replace_callback(
+      '/%[sdfoicSDFOIC]/',
+      function($matches) use (&$count, &$params, &$template, &$styleTagOpened)
+      {
+        $type = strtolower($matches[0]);
+        $out = '';
+
+        // Do we have to close a previous style tag?
+        if ($styleTagOpened)
+        {
+          $out .= '</span>';
+          $styleTagOpened = false;
+        }
+
+        switch ($type)
+        {
+          // Strings
+          case '%s':
+            $out .= (string) array_shift($params);
+            break;
+
+            // Integers
+          case '%d':
+          case '%i':
+            $out .= (int) array_shift($params);
+            break;
+
+            // Floats
+          case '%f':
+            $out .= (float) array_shift($params);
+            break;
+
+          // Objects
+          case '%o':
+            $out .= json_encode(array_shift($params));
+            break;
+
+          // Formatting
+          case '%c':
+            $style = array_shift($params);
+            $styleTagOpened = true;
+            $out .= "<span style=\"$style\">";
+            break;
+
+          default:
+            $out .= array_shift($params);
+        }
+        return $out;
+      },
+      $template
+    );
+
+    // Close any style tag that may remain unclosed
+    if ($styleTagOpened)
+      $template .= "</span>";
+
+    // Apply substitution to any remaining params
+    if (count($params))
+      $params = $this->stringSubstitute($params);
+
+    // Put back the string with the substitution in the params array
+    array_unshift($params, $template);
+
+    return $params;
   }
 
   /**
