@@ -406,14 +406,14 @@ class Bcons
   /**
    * Clears all console panels.
    *
-   * @param bool $showInfo If true (default) a message with "Console cleared"
+   * @param bool $showMessage If true (default) a message with "Console cleared"
    *                       will be shown, otherwise the console will be cleared
    *                       with no messages.
    * @return Bcons
    */
-  public function clear($showInfo = true)
+  public function clear($showMessage = true)
   {
-    $extra = ['clearConsole' => true, 'showClearInfo' => $showInfo];
+    $extra = ['clearConsole' => true, 'showClearInfo' => $showMessage];
 
     $this->buildMessage('l', 'Console cleared', self::CONTENT_AUTO, null, $extra);
 
@@ -787,10 +787,14 @@ class Bcons
     $concat = '';
     foreach ($params as $k => $v)
     {
-      if (!is_string($v) && !is_numeric($v))
+      if (!is_string($v) && !is_numeric($v) && !is_bool($v))
         return $params;
 
-      $concat .= $v.' ';
+      if (is_bool($v) && $v)
+        $concat .= 'true ';
+      else if (is_bool($v) && !$v)
+        $concat .= 'false ';
+      else $concat .= $v.' ';
     }
 
     return substr($concat, 0, -1); // Remove last space

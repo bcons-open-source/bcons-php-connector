@@ -76,7 +76,7 @@ Messages are displayed in the bcons console, which you can access via the bcons 
 
   <sub>Colored groups are exclusive to the bcons console. When a colored group is displayed in the devtools console, it appears as a regular group.</sub>
 
-- In the devtools console, a call to [clear](https://developer.mozilla.org/en-US/docs/Web/API/console/clear_static) clears the console and displays a `Console cleared` message. The bcons clear method accepts an optional boolean parameter; if set to false, that message is not displayed.
+- In the devtools console, a call to [clear](https://developer.mozilla.org/en-US/docs/Web/API/console/clear_static) clears the console and displays a `Console cleared` message. The bcons clear method accepts an optional boolean parameter; if set to false, that message is not displayed. You can also use the `clr` method.
 
 - The [debug](https://developer.mozilla.org/en-US/docs/Web/API/console/debug_static), [info](https://developer.mozilla.org/en-US/docs/Web/API/console/info_static), [dir](https://developer.mozilla.org/en-US/docs/Web/API/console/dir_static) and [dirxml](https://developer.mozilla.org/en-US/docs/Web/API/console/dirxml_static) methods are all aliases of [log](https://developer.mozilla.org/en-US/docs/Web/API/console/log_static).
 
@@ -84,16 +84,17 @@ Messages are displayed in the bcons console, which you can access via the bcons 
 
 We have added some extra functions for a better debugging experience:
 
-- ping: sometimes we just need to know that our script has reached a certain point. This function does just that: it displays the file name and line number, consuming little vertical space. You can add an optional caption.
-  ```php
-  $console->ping('Begin checkout process');
-  ```
-  <img src="https://bcons.dev/img/pingLight.png">
-
-
 - clog: this function behaves like a regular log() call but displays the content in any of the 22 colors available for the group() function. Useful when you have many messages and want to emphasize one.
   ```php
   for ($x = 1; $x < 23; ++$x)
     $console->clog($x, "Message with color $x");
   ```
   <img src="https://bcons.dev/img/clogLight.png">
+
+- clr: clears all console panels without showing any message.
+
+- ping: sometimes we just need to know that our script has reached a certain point. This function does just that: it displays the file name and line number, consuming little vertical space. You can add an optional caption.
+  ```php
+  $console->ping('Begin checkout process');
+  ```
+  <img src="https://bcons.dev/img/pingLight.png">
