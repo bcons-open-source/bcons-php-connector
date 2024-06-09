@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.19';
+  public $version = '1.0.20';
 
   // Default options
   protected $options = array(
@@ -369,7 +369,7 @@ class Bcons
    */
   public function timeEnd($label = 'default')
   {
-    $this->skipBacktrace();
+    $this->skipBacktrace(2);
 
     $args = func_get_args();
 
