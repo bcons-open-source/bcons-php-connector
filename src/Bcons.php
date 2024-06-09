@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.17';
+  public $version = '1.0.19';
 
   // Default options
   protected $options = array(
@@ -77,6 +77,10 @@ class Bcons
 
   // Here we store date for the time / timeEnd calls
   protected $timers = array();
+
+  // The last error / warning message sent to the console, to avoid duplicates
+  // when the shutdown handler is called
+  protected $lastError = null;
 
   /**
    * The constructor may receive a string with the project token or a named
@@ -285,18 +289,27 @@ class Bcons
   }
 
   /**
-   * Logs a message to the error panel only if the condition is false.
+   * Logs data to the error panel only if the condition is false.
    *
-   * @param boolean $condition
-   * @param string $message
+   * @param boolean $condition The condition to check. If false any other
+   *                           params provided will be displayed in the error
+   *                           panel.
    * @return Bcons
    */
-  public function assert(bool $condition, string $message)
+  public function assert(bool $condition)
   {
     if (!$condition)
     {
-      $this->skipBacktrace();
-      $this->error("Assertion failed: $message");
+      $args = func_get_args();
+      array_shift($args);
+
+      if (!count($args))
+        array_unshift($args, 'bcons assert');
+
+      array_unshift($args, 'Assertion failed:');
+
+      $this->skipBacktrace(2);
+      call_user_func_array(array($this, "error"), $args);
     }
 
     return $this;
@@ -358,7 +371,9 @@ class Bcons
   {
     $this->skipBacktrace();
 
-    return $this->timeLog($label);
+    $args = func_get_args();
+
+    call_user_func_array(array($this, "timeLog"), $args);
   }
 
   /**
@@ -375,15 +390,15 @@ class Bcons
     $args = func_get_args();
     $label = array_shift($args);
 
-    if (!$this->timers[$label])
+    if (!isset($this->timers[$label]))
     {
-      $this->warn('w', "Timer '$label' does not exist ");
+      $this->warn("Timer '$label' does not exist ");
       return;
     }
 
     $diff = (microtime(true) * 1000) - $this->timers[$label];
 
-    array_unshift($args, "$label: $diff ms");
+    array_unshift($args, "$label: $diff"."ms");
     $args = $this->parseMultipleParams($args);
 
     return $this->log($args);
@@ -396,28 +411,39 @@ class Bcons
    */
   public function trace()
   {
-    $extra = ['traceIsMsg' => true];
+    $this->skipBacktrace();
+    $args = $this->parseMultipleParams(func_get_args());
 
-    $this->buildMessage('l', ' ', self::CONTENT_AUTO, null, $extra);
-
-    return $this;
+    return $this->log($args);
   }
 
   /**
    * Clears all console panels.
    *
-   * @param bool $showMessage If true (default) a message with "Console cleared"
+   * @param bool $showInfo If true (default) a message with "Console cleared"
    *                       will be shown, otherwise the console will be cleared
    *                       with no messages.
    * @return Bcons
    */
-  public function clear($showMessage = true)
+  public function clear($showInfo = true)
   {
-    $extra = ['clearConsole' => true, 'showClearInfo' => $showMessage];
+    $extra = ['clearConsole' => true, 'showClearInfo' => $showInfo];
 
     $this->buildMessage('l', 'Console cleared', self::CONTENT_AUTO, null, $extra);
 
     return $this;
+  }
+
+  /**
+   * Clears all console panels without showing any message
+   *
+   * @return Bcons
+   */
+  public function clr()
+  {
+    $this->skipBacktrace();
+
+    return $this->clear(false);
   }
 
   /**
@@ -787,14 +813,10 @@ class Bcons
     $concat = '';
     foreach ($params as $k => $v)
     {
-      if (!is_string($v) && !is_numeric($v) && !is_bool($v))
+      if (!is_string($v) && !is_numeric($v))
         return $params;
 
-      if (is_bool($v) && $v)
-        $concat .= 'true ';
-      else if (is_bool($v) && !$v)
-        $concat .= 'false ';
-      else $concat .= $v.' ';
+      $concat .= $v.' ';
     }
 
     return substr($concat, 0, -1); // Remove last space
@@ -963,6 +985,13 @@ class Bcons
       in_array($errorNumber, $this->options['reportErrorLevels'])
     )
     {
+      // Avoid duplicates
+      $errorMd5 = md5(implode('', func_get_args()));
+      if ($this->lastError == $errorMd5)
+        return;
+
+      $this->lastError = $errorMd5;
+
       // Set the message type
       switch ($errorNumber)
       {
@@ -1044,13 +1073,13 @@ class Bcons
         break;
       ++$count;
     }
-    return $line;
+    return htmlspecialchars($line);
   }
 
   /**
    * Sends a message to the request panel with the data sent by the browser.
    *
-   * @return void
+   * @return Bcons
    */
   public function sendRequestPayload()
   {
@@ -1082,16 +1111,20 @@ class Bcons
         $_SERVER['HTTP_CONTENT_TYPE'] == 'application/json'
       )
       {
+        $this->skipBacktrace();
+
         $request = json_decode($inputStream, true);
         $this->buildMessage(self::TYPE_REQUEST, $request);
       }
     }
+
+    return $this;
   }
 
   /**
    * Sends a message to the session panel with session data (if any).
    *
-   * @return void
+   * @return Bcons
    */
   public function sendSessionData()
   {
@@ -1100,12 +1133,14 @@ class Bcons
       $this->skipBacktrace();
       $this->buildMessage(self::TYPE_SESSION, $_SESSION);
     }
+
+    return $this;
   }
 
   /**
    * Sends a message to the cookies panel with cookies data (if any).
    *
-   * @return void
+   * @return Bcons
    */
   public function sendCookiesData()
   {
@@ -1114,6 +1149,8 @@ class Bcons
       $this->skipBacktrace();
       $this->buildMessage(self::TYPE_COOKIE, $_COOKIE);
     }
+
+    return $this;
   }
 
   public function errorName($errorCode)
