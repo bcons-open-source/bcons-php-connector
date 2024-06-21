@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.20';
+  public $version = '1.0.21';
 
   // Default options
   protected $options = array(
@@ -33,10 +33,8 @@ class Bcons
     // The browser extension sends this value in the HTTP request header
     // 'Bcons-User'.
     'userToken' => null,
-    // The key used to encrypt the debug data. If null, data is sent
-    // unencrypted.
-    // You should never send any data through the Internet unencrypted, so we
-    // strongly recommend setting a passphrase here.
+    // The key used to encrypt the debug data. If none is provided the user
+    // token will be used.
     'cryptKey' => null,
     // bcons will send messages for the error levels listed in this array.
     'reportErrorLevels' => array(E_ALL),
@@ -115,7 +113,6 @@ class Bcons
       ];
     }
 
-
     // If bcons project or user is missing there's nothing else to do here
     if (!$this->options['userToken'])
       return;
@@ -125,6 +122,10 @@ class Bcons
       trigger_error('bcons project token not found', E_USER_WARNING);
       return;
     }
+
+    // If no passphrase is provided, use user token
+    if (!$this->options['cryptKey'])
+      $this->options['cryptKey'] = $this->options['userToken'];
 
     // Hook into error handler and shutdown functions
     set_error_handler(array($this, 'errorHandler'));
