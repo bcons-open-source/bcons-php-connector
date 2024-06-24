@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.21';
+  public $version = '1.0.22';
 
   // Default options
   protected $options = array(
@@ -428,7 +428,7 @@ class Bcons
    */
   public function clear($showInfo = true)
   {
-    $extra = ['clearConsole' => true, 'showClearInfo' => $showInfo];
+    $extra = array('clearConsole' => true, 'showClearInfo' => $showInfo);
 
     $this->buildMessage('l', 'Console cleared', self::CONTENT_AUTO, null, $extra);
 
@@ -462,7 +462,7 @@ class Bcons
 
     $extra = array();
     if (isset($columns))
-      $extra = ['columns' => $columns];
+      $extra = array('columns' => $columns);
 
     $this->buildMessage(self::TYPE_LOG, $value, self::CONTENT_TABLE, null, $extra);
 
@@ -506,7 +506,7 @@ class Bcons
   {
     array_pop($this->msgGroups);
 
-    $extra = ['groupEnd' => true];
+    $extra = array('groupEnd' => true);
     $this->buildMessage(self::TYPE_LOG, ' ', self::CONTENT_AUTO, null, $extra);
 
     return $this;
@@ -522,7 +522,7 @@ class Bcons
   {
     if (!$caption)
       $caption = '  ';
-    $extra = ['ping' => $caption];
+    $extra = array('ping' => $caption);
 
     $this->buildMessage('l', ' ', self::CONTENT_AUTO, null, $extra);
 
@@ -545,7 +545,7 @@ class Bcons
     array_shift($args);
     $args = $this->parseMultipleParams($args);
 
-    $extra = ['style' => $className];
+    $extra = array('style' => $className);
 
     $this->buildMessage(
       self::TYPE_LOG,
@@ -587,13 +587,13 @@ class Bcons
     if (is_numeric($className))
       $className = 'group' . $className;
 
-    $this->msgGroups[] = [
+    $this->msgGroups[] = array(
       'id' => bin2hex(openssl_random_pseudo_bytes(6)),
       'parentId' => $parentId,
       'label' => $label,
       'collapsed' => $collapsed,
       'style' => $className
-    ];
+    );
 
     return $this;
   }
@@ -657,6 +657,9 @@ class Bcons
     // Get the backtack info for this call (if not already provided)
     if (!$trace)
     {
+      if (!defined('DEBUG_BACKTRACE_IGNORE_ARGS'))
+        define('DEBUG_BACKTRACE_IGNORE_ARGS', 2);
+
       $trace = array_slice(
         debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),
         $this->numSkipBt
@@ -689,7 +692,7 @@ class Bcons
       'h' => $_SERVER['HTTP_HOST'],
       'fn' => $fileName,
       'fl' => $fileLine,
-      'x' => ['phpBt' => $trace],
+      'x' => array('phpBt' => $trace),
     );
 
     // Add extra data
@@ -738,7 +741,7 @@ class Bcons
    * @param string $dataToSend Message data to send, JSON.
    * @return void
    */
-  public function sendUdpMessage(string $dataToSend)
+  public function sendUdpMessage($dataToSend)
   {
     $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 
@@ -771,7 +774,7 @@ class Bcons
    * @param string $dataToSend Message data to send, JSON.
    * @return void
    */
-  public function sendTcpMessage(string $dataToSend)
+  public function sendTcpMessage($dataToSend)
   {
     $url = 'https://bcons.dev/api/bconsMessage';
     $data = array('message' => $dataToSend);
@@ -946,6 +949,9 @@ class Bcons
   protected function cryptAES256($message)
   {
     $method = 'AES-256-CBC';
+
+    if (!defined('OPENSSL_RAW_DATA'))
+		define('OPENSSL_RAW_DATA', 1);
 
     // Generate a secure IV based on the cipher method's requirements
     $ivLength = openssl_cipher_iv_length($method);
