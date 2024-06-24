@@ -9,7 +9,7 @@ It allows you to perform debugging tasks, such as logging messages or the values
 
 
 ## Requirements
-This package requires only PHP >= 5.3, allowing its use in legacy code (where it is most needed 😅).
+This package requires only PHP >= 5.3.3, allowing its use in legacy code (where it is most needed 😅).
 
 You will also need a bcons account (there is a 'free forever' plan for 1 user and 1 project) and the free bcons browser extension.
 
