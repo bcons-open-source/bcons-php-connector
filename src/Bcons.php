@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.22';
+  public $version = '1.0.23';
 
   // Default options
   protected $options = array(
@@ -1183,6 +1183,10 @@ class Bcons
     if (isset($errors[$errorCode]))
       return $errors[$errorCode];
 
-    return 'UNKNOWN_ERROR';
+    $errorName = 'UNKNOWN_ERROR: ';
+    if ($errorCode)
+      $errorName .= ": $errorCode";
+
+    return $errorName;
   }
 }
