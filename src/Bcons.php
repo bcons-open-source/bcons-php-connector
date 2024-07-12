@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.23';
+  public $version = '1.0.24';
 
   // Default options
   protected $options = array(
@@ -45,7 +45,7 @@ class Bcons
     // appears in the $_SERVER superglobal. If, for example, the header is
     // "Bcons-User: XXXXX" the key will appear as HTTP_BCONS_USER
     'userTokenHttpHeader' => 'HTTP_BCONS_USER',
-    // By default when creating a new instance request, session and cookies
+    // By default, when creating a new instance request, session and cookies
     // messages will be sent.
     'sendRequestDataOnStart' => true,
     'sendSessionDataOnStart' => true,
@@ -647,14 +647,14 @@ class Bcons
     )
       $data = json_encode($data);
 
-    // For the order we'll use the timestamp but we'll add the number of
+    // For the order we'll use the timestamp, but we'll add the number of
     // messages sent, since two consecutive calls may end up having the same
     // timestamp
     $ts = time();
     $count = ++$this->msgCount;
     $order = $ts . str_pad($count, 3, '0', STR_PAD_LEFT);
 
-    // Get the backtack info for this call (if not already provided)
+    // Get the backtrack info for this call (if not already provided)
     if (!$trace)
     {
       if (!defined('DEBUG_BACKTRACE_IGNORE_ARGS'))
@@ -798,7 +798,8 @@ class Bcons
    * method checks those params and, if they are all strings or numbers,
    * returns a single string with the parameters concatenated, as the
    * console.log method of the devtools would do.
-   * Otherwise the provided array is returned and the default behaviour applies.
+   * Otherwise, the provided array is returned and the default behaviour
+   * applies.
    * String substitution placeholders %s, %i, %d, %f, %o, %c are allowed and
    * work as expected.
    *
@@ -815,7 +816,7 @@ class Bcons
 
     // Now, if all params are strings or numbers, concatenate them
     $concat = '';
-    foreach ($params as $k => $v)
+    foreach ($params as $v)
     {
       if (!is_string($v) && !is_numeric($v))
         return $params;
@@ -970,9 +971,7 @@ class Bcons
     );
 
     // Encode the IV and encrypted data with Base64 to ensure safe transit
-    $output = base64_encode($iv . $encrypted);
-
-    return $output;
+    return base64_encode($iv . $encrypted);
   }
 
   /**
@@ -981,7 +980,7 @@ class Bcons
    * @param int $errorNumber Error level number.
    * @param string $errorMsg Error message.
    * @param string $errorFile Filename where the error was raised.
-   * @param int $errorLine Line numnber where the error was raised.
+   * @param int $errorLine Line number where the error was raised.
    * @return void
    */
   public function errorHandler($errorNumber, $errorMsg, $errorFile, $errorLine)
@@ -993,7 +992,7 @@ class Bcons
     )
     {
       // Avoid duplicates
-      $errorMd5 = md5(implode('', func_get_args()));
+      $errorMd5 = md5(serialize(func_get_args()));
       if ($this->lastError == $errorMd5)
         return;
 
@@ -1073,7 +1072,7 @@ class Bcons
   {
     $f = fopen($file, 'r');
     $count = 1;
-    $line = null;
+
     while (($line = fgets($f)) !== false)
     {
       if ($count == $lineNumber)
@@ -1111,7 +1110,7 @@ class Bcons
 
     if ($inputStream && $inputStream != '{}')
     {
-      // Data may come in many formats, but the most usual is application/json
+      // Data may come in many formats, but the most usual is application/json,
       // so we'll take care of that.
       if (
         isset($_SERVER['HTTP_CONTENT_TYPE']) &&
