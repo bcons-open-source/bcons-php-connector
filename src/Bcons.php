@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.24';
+  public $version = '1.0.25';
 
   // Default options
   protected $options = array(
@@ -366,7 +366,7 @@ class Bcons
    * Stops a timer that was previously started by calling time()
    *
    * @param string $label A string representing the name of the timer to stop
-   * @return Bcons
+   * @return void
    */
   public function timeEnd($label = 'default')
   {
@@ -394,7 +394,7 @@ class Bcons
     if (!isset($this->timers[$label]))
     {
       $this->warn("Timer '$label' does not exist ");
-      return;
+      return $this;
     }
 
     $diff = (microtime(true) * 1000) - $this->timers[$label];
@@ -534,7 +534,7 @@ class Bcons
    * createGroup() for details).
    *
    * @param mixed $className
-   * @return void
+   * @return Bcons
    */
   public function clog($className)
   {
@@ -573,7 +573,7 @@ class Bcons
    *                          neutral, zinc, gray and slate.
    *                          If an int X is provided it will be expanded to
    *                          groupX.
-   * @return void
+   * @return Bcons
    */
   protected function createGroup($label = '', $collapsed = false, $className = '')
   {
@@ -921,7 +921,7 @@ class Bcons
    * Returns the most suitable content type for the type of the provided param.
    *
    * @param mixed $data The message data
-   * @return int
+   * @return string
    */
   protected function contentType($data)
   {
@@ -981,7 +981,7 @@ class Bcons
    * @param string $errorMsg Error message.
    * @param string $errorFile Filename where the error was raised.
    * @param int $errorLine Line number where the error was raised.
-   * @return void
+   * @return void|bool
    */
   public function errorHandler($errorNumber, $errorMsg, $errorFile, $errorLine)
   {
