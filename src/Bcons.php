@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.25';
+  public $version = '1.0.26';
 
   // Default options
   protected $options = array(
@@ -992,7 +992,13 @@ class Bcons
     )
     {
       // Avoid duplicates
-      $errorMd5 = md5(serialize(func_get_args()));
+      $errorMd5 = md5(
+        serialize($errorNumber).
+        serialize($errorMsg).
+        serialize($errorFile).
+        serialize($errorLine)
+      );
+
       if ($this->lastError == $errorMd5)
         return;
 
