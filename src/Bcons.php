@@ -520,8 +520,6 @@ class Bcons
    */
   public function ping($caption = '')
   {
-    if (!$caption)
-      $caption = '  ';
     $extra = array('ping' => $caption);
 
     $this->buildMessage('l', ' ', self::CONTENT_AUTO, null, $extra);
