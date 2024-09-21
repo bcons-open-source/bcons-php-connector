@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.22';
+  public $version = '1.0.26';
 
   // Default options
   protected $options = array(
@@ -45,7 +45,7 @@ class Bcons
     // appears in the $_SERVER superglobal. If, for example, the header is
     // "Bcons-User: XXXXX" the key will appear as HTTP_BCONS_USER
     'userTokenHttpHeader' => 'HTTP_BCONS_USER',
-    // By default when creating a new instance request, session and cookies
+    // By default, when creating a new instance request, session and cookies
     // messages will be sent.
     'sendRequestDataOnStart' => true,
     'sendSessionDataOnStart' => true,
@@ -366,7 +366,7 @@ class Bcons
    * Stops a timer that was previously started by calling time()
    *
    * @param string $label A string representing the name of the timer to stop
-   * @return Bcons
+   * @return void
    */
   public function timeEnd($label = 'default')
   {
@@ -394,7 +394,7 @@ class Bcons
     if (!isset($this->timers[$label]))
     {
       $this->warn("Timer '$label' does not exist ");
-      return;
+      return $this;
     }
 
     $diff = (microtime(true) * 1000) - $this->timers[$label];
@@ -532,7 +532,7 @@ class Bcons
    * createGroup() for details).
    *
    * @param mixed $className
-   * @return void
+   * @return Bcons
    */
   public function clog($className)
   {
@@ -571,7 +571,7 @@ class Bcons
    *                          neutral, zinc, gray and slate.
    *                          If an int X is provided it will be expanded to
    *                          groupX.
-   * @return void
+   * @return Bcons
    */
   protected function createGroup($label = '', $collapsed = false, $className = '')
   {
@@ -645,14 +645,14 @@ class Bcons
     )
       $data = json_encode($data);
 
-    // For the order we'll use the timestamp but we'll add the number of
+    // For the order we'll use the timestamp, but we'll add the number of
     // messages sent, since two consecutive calls may end up having the same
     // timestamp
     $ts = time();
     $count = ++$this->msgCount;
     $order = $ts . str_pad($count, 3, '0', STR_PAD_LEFT);
 
-    // Get the backtack info for this call (if not already provided)
+    // Get the backtrack info for this call (if not already provided)
     if (!$trace)
     {
       if (!defined('DEBUG_BACKTRACE_IGNORE_ARGS'))
@@ -796,7 +796,8 @@ class Bcons
    * method checks those params and, if they are all strings or numbers,
    * returns a single string with the parameters concatenated, as the
    * console.log method of the devtools would do.
-   * Otherwise the provided array is returned and the default behaviour applies.
+   * Otherwise, the provided array is returned and the default behaviour
+   * applies.
    * String substitution placeholders %s, %i, %d, %f, %o, %c are allowed and
    * work as expected.
    *
@@ -813,7 +814,7 @@ class Bcons
 
     // Now, if all params are strings or numbers, concatenate them
     $concat = '';
-    foreach ($params as $k => $v)
+    foreach ($params as $v)
     {
       if (!is_string($v) && !is_numeric($v))
         return $params;
@@ -918,7 +919,7 @@ class Bcons
    * Returns the most suitable content type for the type of the provided param.
    *
    * @param mixed $data The message data
-   * @return int
+   * @return string
    */
   protected function contentType($data)
   {
@@ -968,9 +969,7 @@ class Bcons
     );
 
     // Encode the IV and encrypted data with Base64 to ensure safe transit
-    $output = base64_encode($iv . $encrypted);
-
-    return $output;
+    return base64_encode($iv . $encrypted);
   }
 
   /**
@@ -979,8 +978,8 @@ class Bcons
    * @param int $errorNumber Error level number.
    * @param string $errorMsg Error message.
    * @param string $errorFile Filename where the error was raised.
-   * @param int $errorLine Line numnber where the error was raised.
-   * @return void
+   * @param int $errorLine Line number where the error was raised.
+   * @return void|bool
    */
   public function errorHandler($errorNumber, $errorMsg, $errorFile, $errorLine)
   {
@@ -991,7 +990,13 @@ class Bcons
     )
     {
       // Avoid duplicates
-      $errorMd5 = md5(implode('', func_get_args()));
+      $errorMd5 = md5(
+        serialize($errorNumber).
+        serialize($errorMsg).
+        serialize($errorFile).
+        serialize($errorLine)
+      );
+
       if ($this->lastError == $errorMd5)
         return;
 
@@ -1071,7 +1076,7 @@ class Bcons
   {
     $f = fopen($file, 'r');
     $count = 1;
-    $line = null;
+
     while (($line = fgets($f)) !== false)
     {
       if ($count == $lineNumber)
@@ -1109,7 +1114,7 @@ class Bcons
 
     if ($inputStream && $inputStream != '{}')
     {
-      // Data may come in many formats, but the most usual is application/json
+      // Data may come in many formats, but the most usual is application/json,
       // so we'll take care of that.
       if (
         isset($_SERVER['HTTP_CONTENT_TYPE']) &&
@@ -1181,6 +1186,10 @@ class Bcons
     if (isset($errors[$errorCode]))
       return $errors[$errorCode];
 
-    return 'UNKNOWN_ERROR';
+    $errorName = 'UNKNOWN_ERROR: ';
+    if ($errorCode)
+      $errorName .= ": $errorCode";
+
+    return $errorName;
   }
 }
