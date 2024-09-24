@@ -698,8 +698,9 @@ class Bcons
       foreach ($extra as $k => $v)
         $message['x'][$k] = $v;
 
-    // Add the message group info, if any.
-    if (count($this->msgGroups))
+    // Add the message group info, if any. This only applies to log messages,
+    // any other message type must appear in its own panel.
+    if (count($this->msgGroups) && $message['mt'] == 'l')
     {
       $message['x']['groupData'] = end($this->msgGroups);
       $message['x']['groupData']['mt'] = $message['mt'];
