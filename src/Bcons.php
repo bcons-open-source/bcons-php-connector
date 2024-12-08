@@ -21,7 +21,7 @@ class Bcons
   const CONTENT_AUTO = 'auto';
 
   // Package version
-  public $version = '1.0.27';
+  public $version = '1.0.28';
 
   // Default options
   protected $options = array(
@@ -366,7 +366,7 @@ class Bcons
    * Stops a timer that was previously started by calling time()
    *
    * @param string $label A string representing the name of the timer to stop
-   * @return void
+   * @return Bcons
    */
   public function timeEnd($label = 'default')
   {
@@ -375,6 +375,8 @@ class Bcons
     $args = func_get_args();
 
     call_user_func_array(array($this, "timeLog"), $args);
+
+    return $this;
   }
 
   /**
